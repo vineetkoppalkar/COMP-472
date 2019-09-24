@@ -1,5 +1,5 @@
 # COMP-472
-COMP 372 AI Project
+COMP 472 AI Project
 
 ## Team Members
 Name|Student ID| e-mail
