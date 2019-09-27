@@ -1,5 +1,6 @@
 from grid import Grid
 from player import Player
+import re
 
 class GameController:
   player_one = None
@@ -15,6 +16,10 @@ class GameController:
     self.number_of_tokens = number_of_tokens
 
   def parse_input_coord(self, input_coords):
+    is_valid_input = re.match('^([A-L]|[a-l])((10)|[1-9])$', input_coords)
+    if not is_valid_input:
+      return None
+
     letter = input_coords[0]
     number = int(input_coords[1:])
 
@@ -37,12 +42,19 @@ class GameController:
 
       player_input = input("\n" + current_player.name + ", please enter coord: ")
       input_coords = self.parse_input_coord(player_input)
+
+      while input_coords is None:
+        self.grid.display()
+        player_input = input("\n" + current_player.name + ", invalid input. Please re-enter coord as letter A-L followed by number 1-10: ")
+        input_coords = self.parse_input_coord(player_input)
+
       valid_move = self.grid.insert_coords(input_coords.get("row"), input_coords.get("col"), current_player.token)
       
       while not valid_move:
         self.grid.display()
         player_input = input("\n" + current_player.name + ", this cell is already occupied. Please enter new coord: ")
         input_coords = self.parse_input_coord(player_input)
+        # Will crash here if the input is invalid
         valid_move = self.grid.insert_coords(input_coords.get("row"), input_coords.get("col"), current_player.token)
       
       self.grid.display()
@@ -51,7 +63,7 @@ class GameController:
 
       if self.number_of_tokens is 0:
         print("You have reached a draw")
-        break
+        break  
 
   def reset_game(self):
     self.grid = self.grid.clear()
