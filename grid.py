@@ -42,11 +42,27 @@ class Grid:
         else:
             return False
 
+
     def clear(self):
         for i in range(self.height):
             for j in range(self.width):
                 cell = self.grid_cells[i][j]
                 cell.clear()
+
+    def is_occupied(self, row_index, col_index):
+        cell = self.grid_cells[row_index][col_index]
+        return cell.is_empty()
+
+    def get_cell_state(self, row_index, col_index):
+        cell = self.grid_cells[row_index][col_index]
+        return cell.state
+
+    def move_token(self, from_row, from_col, to_row, to_col):
+        from_cell = self.grid_cells[from_row][from_col]
+        to_cell = self.grid_cells[to_row][to_col]
+
+        to_cell.state = from_cell.state
+        from_cell.clear()
 
 class Cell:
     state = " "
