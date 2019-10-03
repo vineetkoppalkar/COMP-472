@@ -18,12 +18,16 @@ class GameController:
     self.number_of_turns = number_of_turns
 
   def parse_input_coord(self, input_coords):
-    is_valid_input = re.match('([A-L]|[a-l])((10)|[1-9])$', input_coords)
+    input_coords = input_coords.upper()
+    if input_coords == "QUIT" or input_coords == "Q":
+      sys.exit()
+
+    is_valid_input = re.match('[A-L]((10)|[1-9])$', input_coords)
 
     if is_valid_input is None:
       return None
 
-    letter = input_coords[0].upper()
+    letter = input_coords[0]
     number = int(input_coords[1:])
 
     print("(" + letter + ", " + str(number) + ")\n")
@@ -84,7 +88,7 @@ class GameController:
       while not is_input_valid:
         self.grid.display()
 
-        player_input = input("\n" + current_player.name + ", please enter coord: ")
+        player_input = input("\n" + current_player.name + ", please enter coord [or quit/q to quit]: ")
         input_coords = self.parse_input_coord(player_input)
 
         if input_coords is None:
@@ -110,7 +114,7 @@ class GameController:
         while not is_input_valid:
           self.grid.display()
 
-          player_input = input("\n" + current_player.name + ", where would you like to move this token?: ")
+          player_input = input("\n" + current_player.name + ", where would you like to move this token? [or quit/q to quit]: ")
           move_coords = self.parse_input_coord(player_input)
 
           if move_coords is None:
