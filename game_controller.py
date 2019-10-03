@@ -37,8 +37,8 @@ class GameController:
 
     return input_coords
 
-  def check_for_win(self, player_name, opponent_token, row_index, col_index):
-    has_player_won = self.grid.check_for_x(row_index, col_index, opponent_token)
+  def check_for_win(self, player_name, player_token, opponent_token, row_index, col_index):
+    has_player_won = self.grid.check_for_x(player_token, opponent_token, row_index, col_index)
     if has_player_won:
       self.exit_program("\n" + player_name + " You win!")
 
@@ -49,21 +49,21 @@ class GameController:
     self.grid.display()
     sys.exit()
 
-  def win_status_check(self, player_name, opponent_token, row_index, col_index):
+  def win_status_check(self, player_name, player_token, opponent_token, row_index, col_index):
     # Center section
-    self.check_for_win(player_name, opponent_token, row_index, col_index)
+    self.check_for_win(player_name, player_token, opponent_token, row_index, col_index)
 
     # Top-left section
-    self.check_for_win(player_name, opponent_token, row_index - 1, col_index - 1)
+    self.check_for_win(player_name, player_token, opponent_token, row_index - 1, col_index - 1)
 
     # Top-right section
-    self.check_for_win(player_name, opponent_token, row_index - 1, col_index + 1)
+    self.check_for_win(player_name, player_token, opponent_token, row_index - 1, col_index + 1)
 
     # Bottom-left section
-    self.check_for_win(player_name, opponent_token, row_index + 1, col_index - 1)
+    self.check_for_win(player_name, player_token, opponent_token, row_index + 1, col_index - 1)
 
     # Bottom-right section
-    self.check_for_win(player_name, opponent_token, row_index + 1, col_index + 1)
+    self.check_for_win(player_name, player_token, opponent_token, row_index + 1, col_index + 1)
   
   def play(self):
     while True:
@@ -128,10 +128,10 @@ class GameController:
           is_input_valid = True
 
       if is_move_action:
-        self.grid.move_token(row_index, col_index, move_row_index, move_col_index)  
+        self.grid.move_token(row_index, col_index, move_row_index, move_col_index)
 
-        # self.win_status_check(current_opponent.name, current_player.token, row_index, col_index - 1)
-        # self.win_status_check(current_opponent.name, current_player.token, row_index, col_index + 1)
+        self.win_status_check(current_opponent.name, current_opponent.token, current_player.token, row_index, col_index - 1)
+        self.win_status_check(current_opponent.name, current_opponent.token, current_player.token, row_index, col_index + 1)
               
         row_index = move_row_index
         col_index = move_col_index
@@ -139,7 +139,7 @@ class GameController:
         self.grid.insert_coords(row_index, col_index, current_player.token)
 
       # Check for win condition
-      self.win_status_check(current_player.name, current_opponent.token, row_index, col_index)
+      self.win_status_check(current_player.name, current_player.token, current_opponent.token, row_index, col_index)
       
       self.is_player_one_turn = not self.is_player_one_turn
       self.number_of_turns -= 1

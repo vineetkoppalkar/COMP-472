@@ -64,7 +64,7 @@ class Grid:
         to_cell.state = from_cell.state
         from_cell.clear()
 
-    def check_for_x(self, row_index, col_index, opponent_token):
+    def check_for_x(self, player_token, opponent_token, row_index, col_index):
         # Check edge cases
         if row_index - 1 < 0 or row_index + 1 >= self.height:
             return False
@@ -84,9 +84,9 @@ class Grid:
         bottom_left_cell_state = self.grid_cells[row_index + 1][col_index - 1].state
         bottom_right_cell_state = self.grid_cells[row_index + 1][col_index + 1].state
 
-        cell_states = [top_left_cell_state, top_right_cell_state, bottom_left_cell_state, bottom_right_cell_state]
+        cell_states = [center_cell_state, top_left_cell_state, top_right_cell_state, bottom_left_cell_state, bottom_right_cell_state]
 
-        return all(state == center_cell_state for state in cell_states)
+        return all(state == player_token for state in cell_states)
 
 class Cell:
     state = " "
