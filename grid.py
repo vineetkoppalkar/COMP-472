@@ -64,6 +64,30 @@ class Grid:
         to_cell.state = from_cell.state
         from_cell.clear()
 
+    def check_for_x(self, row_index, col_index, opponent_token):
+        # Check edge cases
+        if row_index - 1 < 0 or row_index + 1 >= self.height:
+            return False
+        if col_index - 1 < 0 or col_index + 1 >= self.width:
+            return False
+
+        # Check if crossed out
+        right_cell_state = self.grid_cells[row_index][col_index - 1].state
+        left_cell_state = self.grid_cells[row_index][col_index + 1].state
+        if right_cell_state is opponent_token and left_cell_state is opponent_token:
+            return False
+
+        # Check if win condition
+        top_left_cell_state = self.grid_cells[row_index - 1][col_index - 1].state
+        top_right_cell_state = self.grid_cells[row_index - 1][col_index + 1].state
+        center_cell_state = self.grid_cells[row_index][col_index].state
+        bottom_left_cell_state = self.grid_cells[row_index + 1][col_index - 1].state
+        bottom_right_cell_state = self.grid_cells[row_index + 1][col_index + 1].state
+
+        cell_states = [top_left_cell_state, top_right_cell_state, bottom_left_cell_state, bottom_right_cell_state]
+
+        return all(state == center_cell_state for state in cell_states)
+
 class Cell:
     state = " "
 
