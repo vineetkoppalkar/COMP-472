@@ -71,6 +71,11 @@ class Grid:
         if col_index - 1 < 0 or col_index + 1 >= self.width:
             return False
 
+        # If cell is empty, then don't bother continuing to check for X
+        center_cell = self.grid_cells[row_index][col_index]
+        if center_cell.is_empty():
+            return False
+
         # Check if crossed out
         right_cell_state = self.grid_cells[row_index][col_index - 1].state
         left_cell_state = self.grid_cells[row_index][col_index + 1].state
@@ -80,7 +85,7 @@ class Grid:
         # Check if win condition
         top_left_cell_state = self.grid_cells[row_index - 1][col_index - 1].state
         top_right_cell_state = self.grid_cells[row_index - 1][col_index + 1].state
-        center_cell_state = self.grid_cells[row_index][col_index].state
+        center_cell_state = center_cell.state
         bottom_left_cell_state = self.grid_cells[row_index + 1][col_index - 1].state
         bottom_right_cell_state = self.grid_cells[row_index + 1][col_index + 1].state
 

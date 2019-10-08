@@ -133,18 +133,20 @@ class GameController:
 
       if is_move_action:
         self.grid.move_token(row_index, col_index, move_row_index, move_col_index)
+        
+        # Checks if current player has won by moving a token to a new cell
+        self.win_status_check(current_player.name, current_player.token, current_opponent.token, move_row_index, move_col_index)
 
+        # Checks if opponent won by current player's move action
+        # col_index - 1 to check on the left side and col_inx + 1 to chec on the right side
         self.win_status_check(current_opponent.name, current_opponent.token, current_player.token, row_index, col_index - 1)
         self.win_status_check(current_opponent.name, current_opponent.token, current_player.token, row_index, col_index + 1)
-              
-        row_index = move_row_index
-        col_index = move_col_index
+ 
       else:
         self.grid.insert_coords(row_index, col_index, current_player.token)
+        self.win_status_check(current_player.name, current_player.token, current_opponent.token, row_index, col_index)
 
-      # Check for win condition
-      self.win_status_check(current_player.name, current_player.token, current_opponent.token, row_index, col_index)
-      
+  
       self.is_player_one_turn = not self.is_player_one_turn
       self.number_of_turns -= 1
 
