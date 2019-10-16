@@ -17,6 +17,14 @@ class GameController:
     self.grid = grid
     self.number_of_turns = number_of_turns
 
+  def welcome_message(self):
+    print('====================================== Welcome to X-Rudder ======================================')
+    print('Each player gets 15 tokens and is allowed 15 actions (placing a token or moving a token)')
+    print('To place a token, enter the coordinate of an empty cell')
+    print('To move a token, enter the coordinate of a cell containing an existing token followed\nby the coordinate to where the token should be moved')
+    print('Disclaimer: you can only move your own token')
+    print('=================================================================================================\n')
+
   def parse_input_coord(self, input_coords):
     input_coords = input_coords.upper()
     if input_coords == "QUIT" or input_coords == "Q":
@@ -70,6 +78,7 @@ class GameController:
     self.check_for_win(player_name, player_token, opponent_token, row_index + 1, col_index + 1)
   
   def play(self):
+    self.welcome_message()
     while True:
       current_player = self.player_one if self.is_player_one_turn else self.player_two  
       current_opponent = self.player_two if self.is_player_one_turn else self.player_one
@@ -88,11 +97,11 @@ class GameController:
       while not is_input_valid:
         self.grid.display()
 
-        player_input = input("\n" + current_player.name + ", please enter coord [or quit/q to quit]: ")
+        player_input = input("\n" + current_player.name + ", please enter a letter [A-L] followed by a number [1-10] [or quit/q to quit]: ")
         input_coords = self.parse_input_coord(player_input)
 
         if input_coords is None:
-          print("Please enter a letter [A-L] followed by a number [1-10]")
+          print("Please enter a letter [A-L] followed by a number [1-10]\n")
           continue
           
         row_index = input_coords.get("row")
@@ -104,7 +113,7 @@ class GameController:
           if cell_state is current_player.token:
             is_move_action = True
           else:
-            print("This cell is occupied")
+            print("This cell is occupied\n")
             continue
 
         is_input_valid = True
@@ -118,7 +127,7 @@ class GameController:
           move_coords = self.parse_input_coord(player_input)
 
           if move_coords is None:
-            print("Please enter a letter [A-L] followed by a number [1-10]")
+            print("Please enter a letter [A-L] followed by a number [1-10]\n")
             continue
 
           move_row_index = move_coords.get("row")
@@ -126,7 +135,7 @@ class GameController:
 
           has_selected_empty_cell = self.grid.is_occupied(move_row_index, move_col_index)
           if not has_selected_empty_cell:
-            print("This cell is occupied")
+            print("This cell is occupied\n")
             continue
 
           is_input_valid = True
