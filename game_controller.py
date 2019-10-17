@@ -10,12 +10,14 @@ class GameController:
   grid = None
   is_player_one_turn = True
   number_of_tokens = None
+  number_of_moves = None
 
-  def __init__(self, player_one, player_two, grid, number_of_turns):
+  def __init__(self, player_one, player_two, grid, number_of_tokens, number_of_moves):
     self.player_one = player_one
     self.player_two = player_two 
     self.grid = grid
-    self.number_of_turns = number_of_turns
+    self.number_of_tokens = number_of_tokens
+    self.number_of_moves = number_of_moves
 
   def welcome_message(self):
     print('====================================== Welcome to X-Rudder ======================================')
@@ -115,6 +117,10 @@ class GameController:
           else:
             print("This cell is occupied\n")
             continue
+        else:
+          if current_player.number_of_tokens == 0:
+            print("You have ran out of tokens to place. Please make a different move\n")
+            continue
 
         is_input_valid = True
 
@@ -133,6 +139,13 @@ class GameController:
           move_row_index = move_coords.get("row")
           move_col_index = move_coords.get("col")
 
+          # return true if move cell is adjacent to first inputted cell
+          is_valid_adjacent_cell = self.grid.is_valid_adjacent_cell(row_index, col_index, move_row_index, move_col_index)
+          if not is_valid_adjacent_cell:
+            print("This is not a valid adjacent cell")
+            print("Please enter a cell that is up/down/left/right/diagonal to original cell\n")
+            continue
+
           has_selected_empty_cell = self.grid.is_occupied(move_row_index, move_col_index)
           if not has_selected_empty_cell:
             print("This cell is occupied\n")
@@ -150,14 +163,14 @@ class GameController:
         # col_index - 1 to check on the left side and col_inx + 1 to chec on the right side
         self.win_status_check(current_opponent.name, current_opponent.token, current_player.token, row_index, col_index - 1)
         self.win_status_check(current_opponent.name, current_opponent.token, current_player.token, row_index, col_index + 1)
- 
+        self.number_of_moves -= 1
       else:
         self.grid.insert_coords(row_index, col_index, current_player.token)
         self.win_status_check(current_player.name, current_player.token, current_opponent.token, row_index, col_index)
+        self.number_of_tokens -= 1
+        current_player.number_of_tokens -= 1
 
-  
       self.is_player_one_turn = not self.is_player_one_turn
-      self.number_of_turns -= 1
 
-      if self.number_of_turns is 0:
+      if self.number_of_tokens is 0 and self.number_of_moves <= 0:
         self.exit_program("You have reached a draw")
