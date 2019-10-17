@@ -65,39 +65,39 @@ class Grid:
         from_cell.clear()
 
     def is_valid_adjacent_cell(self, row_index, col_index, move_row_index, move_col_index):    
-    # top-left
-    if row_index - 1 == move_row_index and col_index - 1 == move_col_index:
-      return True
+        # top-left
+        if row_index - 1 == move_row_index and col_index - 1 == move_col_index:
+            return True
 
-    # top-middle
-    if row_index - 1 == move_row_index and col_index == move_col_index:
-      return True
+        # top-middle
+        if row_index - 1 == move_row_index and col_index == move_col_index:
+            return True
 
-    # top-right
-    if row_index - 1 == move_row_index and col_index + 1 == move_col_index:
-      return True
-      
-    # left
-    if row_index == move_row_index and col_index - 1 == move_col_index:
-      return True
+        # top-right
+        if row_index - 1 == move_row_index and col_index + 1 == move_col_index:
+            return True
+        
+        # left
+        if row_index == move_row_index and col_index - 1 == move_col_index:
+            return True
 
-    # right
-    if row_index == move_row_index and col_index + 1 == move_col_index:
-      return True
+        # right
+        if row_index == move_row_index and col_index + 1 == move_col_index:
+            return True
 
-    # bottom-left
-    if row_index + 1 == move_row_index and col_index - 1 == move_col_index:
-      return True
+        # bottom-left
+        if row_index + 1 == move_row_index and col_index - 1 == move_col_index:
+            return True
 
-    # bottom-middle
-    if row_index + 1 == move_row_index and col_index == move_col_index:
-      return True
+        # bottom-middle
+        if row_index + 1 == move_row_index and col_index == move_col_index:
+            return True
 
-    # bottom-right
-    if row_index + 1 == move_row_index and col_index + 1 == move_col_index:
-      return True
+        # bottom-right
+        if row_index + 1 == move_row_index and col_index + 1 == move_col_index:
+            return True
 
-    return False
+        return False
 
     def check_for_x(self, player_token, opponent_token, row_index, col_index):
         # Check edge cases
