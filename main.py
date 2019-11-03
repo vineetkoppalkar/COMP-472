@@ -2,16 +2,6 @@ from grid import Grid
 from game_controller import GameController
 from player import Player
 
-def parseUserInput(user_input):
-  letter = user_input[0]
-  number = int(user_input[1:])
-
-  input_coords = {}
-  input_coords['letter'] = letter
-  input_coords['number'] = number
-
-  return input_coords
-
 def main():
   width = 12
   height = 10
