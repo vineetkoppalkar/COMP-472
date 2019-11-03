@@ -37,7 +37,7 @@ class GameController:
       print("Gamemodes:\n")
       print("\t1- Player vs Player")
       print("\t2- Player vs AI")
-      selected_gamemode = input("\nPlease select gamemode option [1 or 2]:")
+      selected_gamemode = input("\nPlease select gamemode option [1 or 2]: ")
 
       if selected_gamemode == "1":
         self.play_with_AI = False
@@ -115,8 +115,12 @@ class GameController:
 
       if current_player is self.player_two and self.play_with_AI:
         # Use minimax and alpha-beta pruning to find best action
+        # self.ai_controller.test_calculate_grid_score(self.grid)
         optimal_choice = self.ai_controller.minimax(self.grid, 2, True)
         self.grid.insert_coords(optimal_choice.x, optimal_choice.y, current_player.token)
+        self.win_status_check(current_player.name, current_player.token, current_opponent.token, optimal_choice.x, optimal_choice.y)
+        self.number_of_tokens -= 1
+        current_player.number_of_tokens -= 1
       else:
         # Prompt player to place/move a token
         input_coords = None
