@@ -148,24 +148,44 @@ class Grid:
         right_cell_state = self.grid_cells[row_index][col_index - 1].state
         left_cell_state = self.grid_cells[row_index][col_index + 1].state
         if right_cell_state is opponent_token and left_cell_state is opponent_token:
-            total_score += -math.inf
+            return -math.inf
         elif right_cell_state is opponent_token or left_cell_state is opponent_token:
             total_score -= 5
 
         # Check for X
         top_left_cell_state = self.grid_cells[row_index - 1][col_index - 1].state
         top_right_cell_state = self.grid_cells[row_index - 1][col_index + 1].state
-        center_cell_state = self.grid_cells[row_index][col_index]
+        # center_cell_state = self.grid_cells[row_index][col_index].state
         bottom_left_cell_state = self.grid_cells[row_index + 1][col_index - 1].state
         bottom_right_cell_state = self.grid_cells[row_index + 1][col_index + 1].state
 
-        cell_states = [center_cell_state, top_left_cell_state, top_right_cell_state, bottom_left_cell_state, bottom_right_cell_state]
+        cell_states = [top_left_cell_state, top_right_cell_state, bottom_left_cell_state, bottom_right_cell_state]
 
         if all(state == player_token for state in cell_states):
-            total_score += math.inf
+            return math.inf
+        
+        if top_left_cell_state == player_token:
+            # print("Top left token is the same")
+            total_score += 5
 
-        for state in cell_states:
-            total_score += 5 if state == player_token else 0
+        if top_right_cell_state == player_token:
+            # print("Top right token is the same")
+            total_score += 5
+        
+        # if center_cell_state == player_token:
+        #     print("center token token is the same")
+        #     total_score += 5
+
+        if bottom_left_cell_state == player_token:
+            # print("Bottom left token is the same")
+            total_score += 5
+        
+        if bottom_right_cell_state == player_token:
+            # print("Bottom right token is the same")
+            total_score += 5
+
+        # for state in cell_states:
+        #     total_score += 5 if state == player_token else 0
 
         return total_score
         

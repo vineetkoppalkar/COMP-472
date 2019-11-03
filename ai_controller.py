@@ -1,5 +1,6 @@
 import math
 import copy
+from grid import Grid
 import random
 
 class AIController:
@@ -42,7 +43,7 @@ class AIController:
 
   def minimax(self, grid, depth, is_max_player):
     has_game_ended = self.has_game_ended(grid)
-    if depth is 0 or has_game_ended:
+    if depth <= 0 or has_game_ended:
       if has_game_ended:
         if self.game_end_status == "Player won":
           return OptimalChoice(-1, -1, -math.inf)
@@ -63,8 +64,8 @@ class AIController:
           if grid.is_occupied(i, j):
             continue
 
-          grid_copy = copy.copy(grid)
-          grid.insert_coords(i, j, self.player_two.token)
+          grid_copy = copy.deepcopy(grid)
+          grid_copy.insert_coords(i, j, self.player_two.token)
 
           new_optimal_choice = self.minimax(grid_copy, depth - 1, False)
           if new_optimal_choice.value > optimal_choice.value:
@@ -82,8 +83,8 @@ class AIController:
           if grid.is_occupied(i, j):
             continue
 
-          grid_copy = copy.copy(grid)
-          grid.insert_coords(i, j, self.player_one.token)
+          grid_copy = copy.deepcopy(grid)
+          grid_copy.insert_coords(i, j, self.player_one.token)
 
           new_optimal_choice = self.minimax(grid_copy, depth - 1, True)
           if new_optimal_choice.value < optimal_choice.value:
@@ -97,20 +98,32 @@ class AIController:
     score = 0
     for i in range(grid.height):
       for j in range(grid.width):
-        score += grid.get_score(self.player_two.token, self.player_one.token, i, j)
+        cell_score = grid.get_score(self.player_two.token, self.player_one.token, i, j)
+        score += cell_score
+    return score
+
+  def test_calculate_grid_score(self, grid):
+    value_grid = Grid(grid.width, grid.height)
+    score = 0
+    for i in range(grid.height):
+      for j in range(grid.width):
+        cell_score = grid.get_score(self.player_two.token, self.player_one.token, i, j)
+        score += cell_score
+        value_grid.insert_coords(i, j, str(cell_score))
+    value_grid.display()
     return score
 
   def random_optimal_choice(self, grid, value):
-    x = -1
-    y = -1
+    row_index = -1
+    col_index = -1
 
     is_coordinate_valid = False
     while not is_coordinate_valid:
-      x = random.randint(1, grid.width)
-      y = random.randint(1, grid.height)
-      is_coordinate_valid = True if not grid.is_occupied(x, y) else False
+      row_index = random.randint(0, grid.height - 1)
+      col_index = random.randint(0, grid.width - 1)
+      is_coordinate_valid = True if not grid.is_occupied(row_index, col_index) else False
 
-    return OptimalChoice(x, y, value)
+    return OptimalChoice(row_index, col_index, value)
 
 class OptimalChoice:
   x = 0
