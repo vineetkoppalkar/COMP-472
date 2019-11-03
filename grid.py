@@ -1,3 +1,5 @@
+import math
+
 class Grid:
     grid_cells = None
     width = 0
@@ -51,7 +53,7 @@ class Grid:
 
     def is_occupied(self, row_index, col_index):
         cell = self.grid_cells[row_index][col_index]
-        return cell.is_empty()
+        return not cell.is_empty()
 
     def get_cell_state(self, row_index, col_index):
         cell = self.grid_cells[row_index][col_index]
@@ -127,7 +129,46 @@ class Grid:
         cell_states = [center_cell_state, top_left_cell_state, top_right_cell_state, bottom_left_cell_state, bottom_right_cell_state]
 
         return all(state == player_token for state in cell_states)
+    
+    def get_score(self, player_token, opponent_token, row_index, col_index):
+        # Check edge cases
+        if row_index - 1 < 0 or row_index + 1 >= self.height:
+            return 0
+        if col_index - 1 < 0 or col_index + 1 >= self.width:
+            return 0
 
+        # If cell is empty, then don't bother continuing to check for X
+        # center_cell = self.grid_cells[row_index][col_index]
+        # if center_cell.is_empty():
+        #     return False
+
+        total_score = 0
+
+        # Check if crossed out
+        right_cell_state = self.grid_cells[row_index][col_index - 1].state
+        left_cell_state = self.grid_cells[row_index][col_index + 1].state
+        if right_cell_state is opponent_token and left_cell_state is opponent_token:
+            total_score += -math.inf
+        elif right_cell_state is opponent_token or left_cell_state is opponent_token:
+            total_score -= 5
+
+        # Check for X
+        top_left_cell_state = self.grid_cells[row_index - 1][col_index - 1].state
+        top_right_cell_state = self.grid_cells[row_index - 1][col_index + 1].state
+        center_cell_state = self.grid_cells[row_index][col_index]
+        bottom_left_cell_state = self.grid_cells[row_index + 1][col_index - 1].state
+        bottom_right_cell_state = self.grid_cells[row_index + 1][col_index + 1].state
+
+        cell_states = [center_cell_state, top_left_cell_state, top_right_cell_state, bottom_left_cell_state, bottom_right_cell_state]
+
+        if all(state == player_token for state in cell_states):
+            total_score += math.inf
+
+        for state in cell_states:
+            total_score += 5 if state == player_token else 0
+
+        return total_score
+        
 class Cell:
     state = " "
 
