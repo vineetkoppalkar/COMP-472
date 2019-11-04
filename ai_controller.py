@@ -43,18 +43,20 @@ class AIController:
 
   def minimax(self, grid, depth, is_max_player):
     has_game_ended = self.has_game_ended(grid)
-    if depth <= 0 or has_game_ended:
-      if has_game_ended:
-        if self.game_end_status == "Player won":
-          return OptimalChoice(-1, -1, -math.inf)
-        elif self.game_end_status == "AI won":
-          return OptimalChoice(-1, -1, math.inf)
-        else:
-          # Ran out of tokens or no more moves
-          return OptimalChoice(-1, -1, 0)
-      else:
-        # Reached depth 0
-        return OptimalChoice(-1, -1, self.calculate_grid_score(grid))
+    if depth == 0 or has_game_ended:
+      return OptimalChoice(-1, -1, self.calculate_grid_score(grid))
+
+    #   if has_game_ended:
+    #     if self.game_end_status == "Player won":
+    #       return OptimalChoice(-1, -1, -math.inf)
+    #     elif self.game_end_status == "AI won":
+    #       return OptimalChoice(-1, -1, math.inf)
+    #     else:
+    #       # Ran out of tokens or no more moves
+    #       return OptimalChoice(-1, -1, 0)
+    #   else:
+    #     # Reached depth 0
+    #     return OptimalChoice(-1, -1, self.calculate_grid_score(grid))
 
     if is_max_player:
       optimal_choice = self.random_optimal_choice(grid, -math.inf)

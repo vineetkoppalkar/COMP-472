@@ -115,8 +115,7 @@ class GameController:
 
       if current_player is self.player_two and self.play_with_AI:
         # Use minimax and alpha-beta pruning to find best action
-        # self.ai_controller.test_calculate_grid_score(self.grid)
-        optimal_choice = self.ai_controller.minimax(self.grid, 2, True)
+        optimal_choice = self.ai_controller.minimax(self.grid, 1, True)
         self.grid.insert_coords(optimal_choice.x, optimal_choice.y, current_player.token)
         self.win_status_check(current_player.name, current_player.token, current_opponent.token, optimal_choice.x, optimal_choice.y)
         self.number_of_tokens -= 1

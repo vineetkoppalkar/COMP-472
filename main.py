@@ -3,8 +3,8 @@ from game_controller import GameController
 from player import Player
 
 def main():
-  width = 12
-  height = 10
+  width = 8
+  height = 9
 
   total_number_of_tokens = 30
   total_number_of_moves = 30
