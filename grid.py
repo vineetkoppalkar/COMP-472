@@ -131,8 +131,12 @@ class Grid:
         return all(state == player_token for state in cell_states)
     
     def get_section_score(self, player_token, opponent_token, row_index, col_index):
-        total_score = 0
+        # Ensure that row and col in within grid
+        # if not ((row_index >= 0 and row_index < self.height) and (col_index >= 0 and col_index < self.width)):
+        #     return 0
 
+        total_score = 0
+        
         # Center
         center_cell_state = self.grid_cells[row_index][col_index].state
         if center_cell_state == player_token:
@@ -197,32 +201,36 @@ class Grid:
             return center_score
 
         # Top-left section
-        top_left_score = self.get_section_score(player_token, opponent_token, row_index - 1, col_index - 1)
-        if top_left_score == math.inf:
-            return top_left_score
-        elif top_left_score == -math.inf:
-            return top_left_score
+        if row_index - 1 >= 0 and col_index - 1 >= 0:
+            top_left_score = self.get_section_score(player_token, opponent_token, row_index - 1, col_index - 1)
+            if top_left_score == math.inf:
+                return top_left_score
+            elif top_left_score == -math.inf:
+                return top_left_score
             
         # Top-right section
-        top_right_score = self.get_section_score(player_token, opponent_token, row_index - 1, col_index + 1)
-        if top_right_score == math.inf:
-            return top_right_score
-        elif top_right_score == -math.inf:
-            return top_right_score
+        if row_index - 1 >= 0 and col_index + 1 < self.width:
+            top_right_score = self.get_section_score(player_token, opponent_token, row_index - 1, col_index + 1)
+            if top_right_score == math.inf:
+                return top_right_score
+            elif top_right_score == -math.inf:
+                return top_right_score
 
         # Bottom-left section
-        bottom_left_score = self.get_section_score(player_token, opponent_token, row_index + 1, col_index - 1)
-        if bottom_left_score == math.inf:
-            return bottom_left_score
-        elif bottom_left_score == -math.inf:
-            return bottom_left_score
+        if row_index + 1 < self.height and col_index - 1 >= 0:
+            bottom_left_score = self.get_section_score(player_token, opponent_token, row_index + 1, col_index - 1)
+            if bottom_left_score == math.inf:
+                return bottom_left_score
+            elif bottom_left_score == -math.inf:
+                return bottom_left_score
 
         # Bottom-right section
-        bottom_right_score = self.get_section_score(player_token, opponent_token, row_index + 1, col_index + 1)
-        if bottom_right_score == math.inf:
-            return bottom_right_score
-        elif bottom_right_score == -math.inf:
-            return bottom_right_score
+        if row_index + 1 < self.height and col_index + 1 < self.width:
+            bottom_right_score = self.get_section_score(player_token, opponent_token, row_index + 1, col_index + 1)
+            if bottom_right_score == math.inf:
+                return bottom_right_score
+            elif bottom_right_score == -math.inf:
+                return bottom_right_score
 
         return center_score
                 

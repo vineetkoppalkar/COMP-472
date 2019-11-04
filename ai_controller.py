@@ -46,7 +46,7 @@ class AIController:
   def minimax(self, grid, depth, is_max_player):
     has_game_ended = self.has_game_ended(grid)
     if depth == 0 or has_game_ended:
-      return OptimalChoice(-1, -1, self.test_calculate_grid_score(grid))
+      return OptimalChoice(-1, -1, self.calculate_grid_score(grid))
 
     #   if has_game_ended:
     #     if self.game_end_status == "Player won":
@@ -63,19 +63,31 @@ class AIController:
     if is_max_player:
       optimal_choice = self.random_optimal_choice(grid, -math.inf)
 
+      is_first_placement = False
       for i in range(grid.height):
         for j in range(grid.width):
           if grid.is_occupied(i, j):
             continue
+          
+          grid_copy = copy.deepcopy(grid)
+          if i == 0 and j == 0:
+            is_first_placement = True
+          else:
+            is_first_placement = False
 
-            grid_copy = copy.deepcopy(grid)
+          if is_first_placement:
+            grid_copy.insert_coords(optimal_choice.x, optimal_choice.y, self.player_two.token)            
+          else: 
             grid_copy.insert_coords(i, j, self.player_two.token)
 
-            new_optimal_choice = self.minimax(grid_copy, depth - 1, False)
-            if new_optimal_choice.value > optimal_choice.value:
+          new_optimal_choice = self.minimax(grid_copy, depth - 1, False)
+
+          if new_optimal_choice.value > optimal_choice.value:
+            if not is_first_placement:
               optimal_choice.x = i
               optimal_choice.y = j
-              optimal_choice.value = new_optimal_choice.value
+
+            optimal_choice.value = new_optimal_choice.value
 
       return optimal_choice
 
@@ -84,31 +96,31 @@ class AIController:
 
       for i in range(grid.height):
         for j in range(grid.width):
-            if grid.is_occupied(i, j):
-              continue
+          if grid.is_occupied(i, j):
+            continue
 
-            grid_copy = copy.deepcopy(grid)
-            grid_copy.insert_coords(i, j, self.player_one.token)
+          grid_copy = copy.deepcopy(grid)
+          grid_copy.insert_coords(i, j, self.player_one.token)
 
-            new_optimal_choice = self.minimax(grid_copy, depth - 1, True)
-            if new_optimal_choice.value < optimal_choice.value:
-              optimal_choice.x = i
-              optimal_choice.y = j
-              optimal_choice.value = new_optimal_choice.value
+          new_optimal_choice = self.minimax(grid_copy, depth - 1, True)
+          if new_optimal_choice.value < optimal_choice.value:
+            optimal_choice.x = i
+            optimal_choice.y = j
+            optimal_choice.value = new_optimal_choice.value
 
       return optimal_choice
 
   def calculate_grid_score(self, grid):
-    highest_score = 0
+    highest_score = -1
     for i in range(grid.height):
       for j in range(grid.width):
-        new_score = grid.get_score(self.player_two.token, self.player_one.token, i, j)
-        if new_score == math.inf:
-          return new_score
-        elif new_score == -math.inf:
-          return new_score
-        elif highest_score < new_score:
-          score = highest_score 
+        result = grid.get_score(self.player_two.token, self.player_one.token, i, j)
+        if result == math.inf:
+          return result
+        elif result == -math.inf:
+          return result
+        elif result > highest_score:
+          highest_score = result 
     return highest_score
 
   def test_calculate_grid_score(self, grid):
@@ -118,14 +130,14 @@ class AIController:
       for j in range(grid.width):
         new_score = grid.get_score(self.player_two.token, self.player_one.token, i, j)
         if new_score == math.inf:
-          score = new_score
+          highest_score = new_score
           return new_score
         elif new_score == -math.inf:
-          score = new_score
+          highest_score = new_score
           return new_score
         elif highest_score < new_score:
-          score = highest_score 
-        value_grid.insert_coords(i, j, str(score))
+          highest_score = highest_score 
+        value_grid.insert_coords(i, j, str(highest_score))
     value_grid.display()
     return highest_score
 
