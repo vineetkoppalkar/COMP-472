@@ -8,6 +8,7 @@ class AIController:
   player_one = None
   player_two = None
   game_end_status = None
+  is_first_placement = False
 
   def __init__(self, player_one, player_two):
     self.player_one = player_one
@@ -46,7 +47,7 @@ class AIController:
   def minimax(self, grid, depth, is_max_player):
     has_game_ended = self.has_game_ended(grid)
     if depth == 0 or has_game_ended:
-      return OptimalChoice(-1, -1, self.calculate_grid_score(grid))
+      return OptimalChoice(-1, -1, self.calculate_grid_score(grid, is_max_player))
 
     #   if has_game_ended:
     #     if self.game_end_status == "Player won":
@@ -63,7 +64,7 @@ class AIController:
     if is_max_player:
       optimal_choice = self.random_optimal_choice(grid, -math.inf)
 
-      is_first_placement = False
+      self.is_first_placement = False
       for i in range(grid.height):
         for j in range(grid.width):
           if grid.is_occupied(i, j):
@@ -71,11 +72,11 @@ class AIController:
           
           grid_copy = copy.deepcopy(grid)
           if i == 0 and j == 0:
-            is_first_placement = True
+            self.is_first_placement = True
           else:
-            is_first_placement = False
+            self.is_first_placement = False
 
-          if is_first_placement:
+          if self.is_first_placement:
             grid_copy.insert_coords(optimal_choice.x, optimal_choice.y, self.player_two.token)            
           else: 
             grid_copy.insert_coords(i, j, self.player_two.token)
@@ -83,7 +84,7 @@ class AIController:
           new_optimal_choice = self.minimax(grid_copy, depth - 1, False)
 
           if new_optimal_choice.value > optimal_choice.value:
-            if not is_first_placement:
+            if not self.is_first_placement:
               optimal_choice.x = i
               optimal_choice.y = j
 
@@ -110,8 +111,8 @@ class AIController:
 
       return optimal_choice
 
-  def calculate_grid_score(self, grid):
-    highest_score = -1
+  def calculate_grid_score(self, grid, is_max_player):
+    score = -1
     for i in range(grid.height):
       for j in range(grid.width):
         result = grid.get_score(self.player_two.token, self.player_one.token, i, j)
@@ -119,27 +120,32 @@ class AIController:
           return result
         elif result == -math.inf:
           return result
-        elif result > highest_score:
-          highest_score = result 
-    return highest_score
+        # elif result > score:
+        #   score = result
+        else:
+          if is_max_player and result > score:
+            score = result 
+          elif not is_max_player and result < score:
+            score = result
+    return score
 
-  def test_calculate_grid_score(self, grid):
-    value_grid = Grid(grid.width, grid.height)
-    highest_score = 0
-    for i in range(grid.height):
-      for j in range(grid.width):
-        new_score = grid.get_score(self.player_two.token, self.player_one.token, i, j)
-        if new_score == math.inf:
-          highest_score = new_score
-          return new_score
-        elif new_score == -math.inf:
-          highest_score = new_score
-          return new_score
-        elif highest_score < new_score:
-          highest_score = highest_score 
-        value_grid.insert_coords(i, j, str(highest_score))
-    value_grid.display()
-    return highest_score
+  # def test_calculate_grid_score(self, grid):
+  #   value_grid = Grid(grid.width, grid.height)
+  #   highest_score = 0
+  #   for i in range(grid.height):
+  #     for j in range(grid.width):
+  #       new_score = grid.get_score(self.player_two.token, self.player_one.token, i, j)
+  #       if new_score == math.inf:
+  #         highest_score = new_score
+  #         return new_score
+  #       elif new_score == -math.inf:
+  #         highest_score = new_score
+  #         return new_score
+  #       elif highest_score < new_score:
+  #         highest_score = highest_score 
+  #       value_grid.insert_coords(i, j, str(highest_score))
+  #   value_grid.display()
+  #   return highest_score
 
   # def test_calculate_grid_score(self, grid):
   #     value_grid = Grid(grid.width, grid.height)
@@ -158,10 +164,11 @@ class AIController:
 
       is_coordinate_valid = False
       while not is_coordinate_valid:
-          row_index = random.randint(0, grid.height - 1)
-          col_index = random.randint(0, grid.width - 1)
-          is_coordinate_valid = True if not grid.is_occupied(
-              row_index, col_index) else False
+          # Don't pick random coordinates at the edges of the grid
+          row_index = random.randint(1, grid.height - 1)
+          col_index = random.randint(1, grid.width - 1)
+
+          is_coordinate_valid = True if not grid.is_occupied(row_index, col_index) else False
 
       return OptimalChoice(row_index, col_index, value)
 
