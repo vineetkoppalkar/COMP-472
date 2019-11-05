@@ -164,7 +164,7 @@ class AIController:
 
       is_coordinate_valid = False
       while not is_coordinate_valid:
-          # Don't pick random coordinates at the edges of the grid
+          # Don't pick coordinates at the edges of the grid
           row_index = random.randint(1, grid.height - 1)
           col_index = random.randint(1, grid.width - 1)
 

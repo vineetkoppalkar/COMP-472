@@ -120,6 +120,8 @@ class GameController:
         while True:
             current_player = self.player_one if self.is_player_one_turn else self.player_two
             current_opponent = self.player_two if self.is_player_one_turn else self.player_one
+            
+            self.grid.display()
 
             if current_player is self.player_two and self.play_with_AI:
                 # Use minimax and alpha-beta pruning to find best action
@@ -142,8 +144,6 @@ class GameController:
                 is_move_action = False
 
                 while not is_input_valid:
-                    self.grid.display()
-
                     player_input = input(
                         "\n" + current_player.name + ", please enter a letter [A-L] followed by a number [1-10] [or quit/q to quit]: ")
                     input_coords = self.parse_input_coord(player_input)

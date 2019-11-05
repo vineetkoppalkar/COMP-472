@@ -102,10 +102,7 @@ class Grid:
         return False
 
     def check_for_x(self, player_token, opponent_token, row_index, col_index):
-        # Check edge cases
-        if row_index - 1 < 0 or row_index + 1 >= self.height:
-            return False
-        if col_index - 1 < 0 or col_index + 1 >= self.width:
+        if not self.is_section_within_grid(row_index, col_index):
             return False
 
         # If cell is empty, then don't bother continuing to check for X
@@ -129,6 +126,14 @@ class Grid:
         cell_states = [center_cell_state, top_left_cell_state, top_right_cell_state, bottom_left_cell_state, bottom_right_cell_state]
 
         return all(state == player_token for state in cell_states)
+
+    def is_section_within_grid(self, row_index, col_index):
+        # Check edge cases
+        if row_index - 1 < 0 or row_index + 1 >= self.height:
+            return False
+        if col_index - 1 < 0 or col_index + 1 >= self.width:
+            return False
+        return True
     
     def get_section_score(self, player_token, opponent_token, row_index, col_index):
         total_score = 0
@@ -199,7 +204,6 @@ class Grid:
         
         return total_score
 
-
     def get_score(self, player_token, opponent_token, row_index, col_index):
         # Center section
         center_score = self.get_section_score(player_token, opponent_token, row_index, col_index)
@@ -210,7 +214,7 @@ class Grid:
 
         # Top-left section
         top_left_score = 0
-        if row_index - 1 >= 0 and col_index - 1 >= 0:
+        if self.is_section_within_grid(row_index - 1, col_index - 1):
             if self.get_cell_state(row_index - 1, col_index - 1) != opponent_token:
                 top_left_score = self.get_section_score(player_token, opponent_token, row_index - 1, col_index - 1)
                 if top_left_score == math.inf:
@@ -220,7 +224,7 @@ class Grid:
             
         # Top-right section
         top_right_score = 0
-        if row_index - 1 >= 0 and col_index + 1 < self.width:
+        if self.is_section_within_grid(row_index - 1, col_index + 1):
             if self.get_cell_state(row_index - 1, col_index + 1) != opponent_token:
                 top_right_score = self.get_section_score(player_token, opponent_token, row_index - 1, col_index + 1)
                 if top_right_score == math.inf:
@@ -230,7 +234,7 @@ class Grid:
 
         # Bottom-left section
         bottom_left_score = 0
-        if row_index + 1 < self.height and col_index - 1 >= 0:
+        if self.is_section_within_grid(row_index + 1, col_index - 1):
             if self.get_cell_state(row_index + 1, col_index - 1) != opponent_token:   
                 bottom_left_score = self.get_section_score(player_token, opponent_token, row_index + 1, col_index - 1)
                 if bottom_left_score == math.inf:
@@ -240,7 +244,7 @@ class Grid:
 
         # Bottom-right section
         bottom_right_score = 0
-        if row_index + 1 < self.height and col_index + 1 < self.width:
+        if self.is_section_within_grid(row_index + 1, col_index + 1):            
             if self.get_cell_state(row_index + 1, col_index + 1) != opponent_token:
                 bottom_right_score = self.get_section_score(player_token, opponent_token, row_index + 1, col_index + 1)
                 if bottom_right_score == math.inf:
@@ -251,7 +255,6 @@ class Grid:
         # return math.pow(2, center_score) + math.pow(2, top_left_score) + math.pow(2, top_right_score) + math.pow(2, bottom_left_score) + math.pow(2, bottom_right_score)
 
         return center_score + top_left_score + top_right_score + bottom_left_score + bottom_right_score
-                
 
 class Cell:
     state = " "
