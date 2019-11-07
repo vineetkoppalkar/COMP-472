@@ -103,6 +103,37 @@ class LightweightGrid:
 
         return all(state == player_token for state in cell_states)
 
+    def num_tokens_in_x(self, player_token, opponent_token, row_index, col_index):
+        if not self.is_section_within_grid(row_index, col_index):
+            return 0
+
+        # # If cell is empty, then don't bother continuing to check for X
+        # center_cell = self.grid_cells[row_index][col_index]
+        # if center_cell == " ":
+        #     return False
+
+        # # Check if crossed out
+        # right_cell_state = self.grid_cells[row_index][col_index - 1]
+        # left_cell_state = self.grid_cells[row_index][col_index + 1]
+        # if right_cell_state is opponent_token and left_cell_state is opponent_token:
+        #     return False
+
+        # Check if win condition
+        top_left_cell_state = self.grid_cells[row_index - 1][col_index - 1]
+        top_right_cell_state = self.grid_cells[row_index - 1][col_index + 1]
+        center_cell_state = self.grid_cells[row_index][col_index]
+        bottom_left_cell_state = self.grid_cells[row_index + 1][col_index - 1]
+        bottom_right_cell_state = self.grid_cells[row_index + 1][col_index + 1]
+
+        cell_states = [center_cell_state, top_left_cell_state, top_right_cell_state, bottom_left_cell_state, bottom_right_cell_state]
+        
+        num_cells_filled_correctly = 0
+        for state in cell_states:
+            if state == player_token:
+                num_cells_filled_correctly += 1
+
+        return num_cells_filled_correctly
+
     def is_section_within_grid(self, row_index, col_index):
         # Check edge cases
         if row_index - 1 < 0 or row_index + 1 >= self.height:
@@ -167,14 +198,20 @@ class LightweightGrid:
 
         # Check if crossed out
         is_left_state_occupied = False
+        left_cell_state = None
         if col_index - 1 >= 0:
             left_cell_state = self.grid_cells[row_index][col_index - 1]
             is_left_state_occupied = True if left_cell_state == opponent_token else False
+            if is_left_state_occupied:
+                num_opponent_tokens += 1
 
         is_right_state_occupied = False
+        right_cell_state = None
         if col_index + 1 < self.width:
             right_cell_state = self.grid_cells[row_index][col_index + 1]
             is_right_state_occupied = True if right_cell_state == opponent_token else False
+            if is_right_state_occupied:
+                num_opponent_tokens += 1
         
         # If player has made X pattern but it is crossed out, return -infinity
         is_crossed_out = is_left_state_occupied and is_right_state_occupied
@@ -186,8 +223,32 @@ class LightweightGrid:
         # If the X pattern is filled but doesn't form a winning X, return 0 score for this pattern        
         if all(state == player_token or state == opponent_token for state in cell_states):
             return 0 
+        
+        cross_out_score = 0
 
-        return math.factorial(num_player_tokens) - math.factorial(num_opponent_tokens)
+        # # Check if player needs to cross out opponent
+        # Right case
+        if col_index + 2 < self.width: 
+            right_crossing_cell = self.grid_cells[row_index][col_index + 2]
+            opponent_tokens_in_x = self.num_tokens_in_x(opponent_token, player_token, row_index, col_index + 1)
+            if right_crossing_cell == player_token and opponent_tokens_in_x == 5:
+                return math.inf
+            elif opponent_tokens_in_x >= 3:
+                cross_out_score += 5 * opponent_tokens_in_x
+                
+        # Left case
+        if col_index - 2 >= 0:
+            left_crossing_cell = self.grid_cells[row_index][col_index - 2]
+            opponent_tokens_in_x = self.num_tokens_in_x(opponent_token, player_token, row_index, col_index - 1)
+            if left_crossing_cell == player_token and opponent_tokens_in_x == 5:
+                return math.inf
+            elif opponent_tokens_in_x >= 3:
+                cross_out_score += 5 * opponent_tokens_in_x
+
+        total_score = math.factorial(num_player_tokens) - math.factorial(num_opponent_tokens)
+        total_score += cross_out_score
+
+        return total_score
 
     def get_score(self, player_token, opponent_token, row_index, col_index):
         # Center section

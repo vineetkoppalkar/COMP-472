@@ -1,6 +1,6 @@
 import math
 import copy
-from grid import Grid
+from lightweight_grid import LightweightGrid
 import random
 
 
@@ -62,40 +62,46 @@ class AIController:
 
     if is_max_player:
       optimal_choice = self.random_optimal_choice(grid, -math.inf)
+      # self.is_first_placement = False
 
       should_prune = False
-      self.is_first_placement = False
       for i in range(grid.height):
         if should_prune:
           break
         for j in range(grid.width):
+
           if grid.is_occupied(i, j):
             continue
           
           grid_copy = copy.deepcopy(grid)
 
-          if i == 0 and j == 0:
-            self.is_first_placement = True
-          else:
-            self.is_first_placement = False
+          # if i == 0 and j == 0:
+          #   self.is_first_placement = True
+          # else:
+          #   self.is_first_placement = False
 
-          if self.is_first_placement:
-            grid_copy.insert_coords(optimal_choice.x, optimal_choice.y, self.player_two.token)            
-          else: 
-            grid_copy.insert_coords(i, j, self.player_two.token)
+          # if self.is_first_placement:
+          #   grid_copy.insert_coords(optimal_choice.x, optimal_choice.y, self.player_two.token)            
+          # else: 
+          #   grid_copy.insert_coords(i, j, self.player_two.token)
 
-          new_optimal_choice = None
-          if self.is_first_placement:
-            new_optimal_choice = self.minimax(grid_copy, depth - 1, alpha, beta, False, optimal_choice.x, optimal_choice.y)
-          else:
-            new_optimal_choice = self.minimax(grid_copy, depth - 1, alpha, beta, False, i, j)
+          grid_copy.insert_coords(i, j, self.player_two.token)
 
+          # new_optimal_choice = None
+          # if self.is_first_placement:
+          #   new_optimal_choice = self.minimax(grid_copy, depth - 1, alpha, beta, False, optimal_choice.x, optimal_choice.y)
+          # else:
+          #   new_optimal_choice = self.minimax(grid_copy, depth - 1, alpha, beta, False, i, j)
+
+          new_optimal_choice = self.minimax(grid_copy, depth - 1, alpha, beta, False, i, j)
 
           if new_optimal_choice.value > optimal_choice.value:
-            if not self.is_first_placement:
-              optimal_choice.x = i
-              optimal_choice.y = j
+            # if not self.is_first_placement:
+            #   optimal_choice.x = i
+            #   optimal_choice.y = j
 
+            optimal_choice.x = i
+            optimal_choice.y = j
             optimal_choice.value = new_optimal_choice.value
 
           alpha = max(alpha, optimal_choice.value)

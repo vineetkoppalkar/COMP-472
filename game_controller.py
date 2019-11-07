@@ -20,6 +20,7 @@ class GameController:
 
     ai_controller = None
     play_with_AI = False
+    is_first_ai_placement = False
 
     def __init__(self, player_one, player_two, grid, lightweight_grid, number_of_tokens, number_of_moves):
         self.player_one = player_one
@@ -53,6 +54,7 @@ class GameController:
             elif selected_gamemode == "2":
                 self.play_with_AI = True
                 is_input_valid = True
+                self.is_first_ai_placement = True
                 self.ai_controller = AIController(
                     self.player_one, self.player_two)
 
@@ -127,8 +129,14 @@ class GameController:
             current_opponent = self.player_two if self.is_player_one_turn else self.player_one
             
             if current_player is self.player_two and self.play_with_AI:
-                # Use minimax and alpha-beta pruning to find best action
-                optimal_choice = self.ai_controller.minimax(self.lightweight_grid, 2, -math.inf, math.inf, True, -1, -1)
+
+                optimal_choice = None
+                if self.is_first_ai_placement:
+                    optimal_choice = self.ai_controller.random_optimal_choice(self.lightweight_grid, 0)
+                    self.is_first_ai_placement = False
+                else:
+                    # Use minimax and alpha-beta pruning to find best action
+                    optimal_choice = self.ai_controller.minimax(self.lightweight_grid, 1, -math.inf, math.inf, True, -1, -1)
                 
                 self.grid.insert_coords(optimal_choice.x, optimal_choice.y, current_player.token)
                 self.lightweight_grid.insert_coords(optimal_choice.x, optimal_choice.y, current_player.token)
