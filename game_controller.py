@@ -1,8 +1,10 @@
 from grid import Grid
+from lightweight_grid import LightweightGrid
 from player import Player
 from ai_controller import AIController
 import re
 import sys
+import math
 
 
 class GameController:
@@ -10,6 +12,8 @@ class GameController:
     player_two = None
 
     grid = None
+    lightweight_grid = None
+
     is_player_one_turn = True
     number_of_tokens = None
     number_of_moves = None
@@ -17,10 +21,11 @@ class GameController:
     ai_controller = None
     play_with_AI = False
 
-    def __init__(self, player_one, player_two, grid, number_of_tokens, number_of_moves):
+    def __init__(self, player_one, player_two, grid, lightweight_grid, number_of_tokens, number_of_moves):
         self.player_one = player_one
         self.player_two = player_two
         self.grid = grid
+        self.lightweight_grid = lightweight_grid
         self.number_of_tokens = number_of_tokens
         self.number_of_moves = number_of_moves
 
@@ -121,12 +126,13 @@ class GameController:
             current_player = self.player_one if self.is_player_one_turn else self.player_two
             current_opponent = self.player_two if self.is_player_one_turn else self.player_one
             
-            self.grid.display()
-
             if current_player is self.player_two and self.play_with_AI:
                 # Use minimax and alpha-beta pruning to find best action
-                optimal_choice = self.ai_controller.minimax(self.grid, 2, True)
+                optimal_choice = self.ai_controller.minimax(self.lightweight_grid, 2, -math.inf, math.inf, True, -1, -1)
+                
                 self.grid.insert_coords(optimal_choice.x, optimal_choice.y, current_player.token)
+                self.lightweight_grid.insert_coords(optimal_choice.x, optimal_choice.y, current_player.token)
+                
                 self.win_status_check(current_player.name, current_player.token, current_opponent.token, optimal_choice.x, optimal_choice.y)
                 self.number_of_tokens -= 1
                 current_player.number_of_tokens -= 1
@@ -144,6 +150,8 @@ class GameController:
                 is_move_action = False
 
                 while not is_input_valid:
+                    self.grid.display()
+
                     player_input = input(
                         "\n" + current_player.name + ", please enter a letter [A-L] followed by a number [1-10] [or quit/q to quit]: ")
                     input_coords = self.parse_input_coord(player_input)
@@ -209,9 +217,9 @@ class GameController:
                         is_input_valid = True
 
                 if is_move_action:
-                    self.grid.move_token(
-                        row_index, col_index, move_row_index, move_col_index)
-
+                    self.grid.move_token(row_index, col_index, move_row_index, move_col_index)
+                    self.lightweight_grid.move_token(row_index, col_index, move_row_index, move_col_index)
+                    
                     # Checks if current player has won by moving a token to a new cell
                     self.win_status_check(current_player.name, current_player.token,
                                           current_opponent.token, move_row_index, move_col_index)
@@ -224,13 +232,14 @@ class GameController:
                         current_opponent.name, current_opponent.token, current_player.token, row_index, col_index + 1)
                     self.number_of_moves -= 1
                 else:
-                    self.grid.insert_coords(
-                        row_index, col_index, current_player.token)
+                    self.grid.insert_coords(row_index, col_index, current_player.token)
+                    self.lightweight_grid.insert_coords(row_index, col_index, current_player.token)
+
                     self.win_status_check(
                         current_player.name, current_player.token, current_opponent.token, row_index, col_index)
                     self.number_of_tokens -= 1
                     current_player.number_of_tokens -= 1
-
+            
             self.is_player_one_turn = not self.is_player_one_turn
 
             if self.number_of_tokens is 0 and self.number_of_moves <= 0:
