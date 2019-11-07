@@ -127,8 +127,12 @@ class GameController:
             current_opponent = self.player_two if self.is_player_one_turn else self.player_one
             
             if current_player is self.player_two and self.play_with_AI:
+                is_move = False
+                if(self.player_two.number_of_tokens <= 0):
+                    is_move = True
+
                 # Use minimax and alpha-beta pruning to find best action
-                optimal_choice = self.ai_controller.minimax(self.lightweight_grid, 2, -math.inf, math.inf, True, -1, -1)
+                optimal_choice = self.ai_controller.minimax(self.lightweight_grid, 2, -math.inf, math.inf, True, is_move)
                 
                 self.grid.insert_coords(optimal_choice.x, optimal_choice.y, current_player.token)
                 self.lightweight_grid.insert_coords(optimal_choice.x, optimal_choice.y, current_player.token)

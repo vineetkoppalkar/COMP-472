@@ -43,7 +43,7 @@ class AIController:
     self.game_end_status = "Game has not ended"
     return False
 
-  def minimax(self, grid, depth, alpha, beta, is_max_player, row_index, col_index):
+  def minimax(self, grid, depth, alpha, beta, is_max_player, is_move):
     has_game_ended = self.has_game_ended(grid)
     if depth == 0 or has_game_ended:
       return OptimalChoice(-1, -1, self.calculate_grid_score(grid, is_max_player))
@@ -59,78 +59,130 @@ class AIController:
     #   else:
     #     # Reached depth 0
     #     return OptimalChoice(-1, -1, self.calculate_grid_score(grid))
+    if is_move:
+      if is_max_player:
+        optimal_choice = None
+        should_prune = False
 
-    if is_max_player:
-      optimal_choice = self.random_optimal_choice(grid, -math.inf)
+        for i in range(grid.height):
+          if should_prune:
+            break
+          for j in range(grid.width):
+            if not grid.adjacent_cell(i, j, self.player_two.token):
+              continue
+           
+            grid_copy = copy.deepcopy(grid)
+            token_to_move = grid.get_adjacent_cell(i,j)
+            grid_copy.move_token(i, j, token_to_move.x, token_to_move.y)
 
-      should_prune = False
-      self.is_first_placement = False
-      for i in range(grid.height):
-        if should_prune:
-          break
-        for j in range(grid.width):
-          if grid.is_occupied(i, j):
-            continue
-          
-          grid_copy = copy.deepcopy(grid)
-
-          if i == 0 and j == 0:
-            self.is_first_placement = True
-          else:
-            self.is_first_placement = False
-
-          if self.is_first_placement:
-            grid_copy.insert_coords(optimal_choice.x, optimal_choice.y, self.player_two.token)            
-          else: 
-            grid_copy.insert_coords(i, j, self.player_two.token)
-
-          new_optimal_choice = None
-          if self.is_first_placement:
-            new_optimal_choice = self.minimax(grid_copy, depth - 1, alpha, beta, False, optimal_choice.x, optimal_choice.y)
-          else:
-            new_optimal_choice = self.minimax(grid_copy, depth - 1, alpha, beta, False, i, j)
-
-
-          if new_optimal_choice.value > optimal_choice.value:
-            if not self.is_first_placement:
+            new_optimal_choice = None
+            new_optimal_choice = self.minimax(grid_copy, depth - 1, alpha, beta, False, is_move)
+            if new_optimal_choice.value < optimal_choice.value:
               optimal_choice.x = i
               optimal_choice.y = j
+              optimal_choice.value = new_optimal_choice.value
 
-            optimal_choice.value = new_optimal_choice.value
+            alpha = max(alpha, optimal_choice.value)
+            if alpha >= beta:
+              should_prune = True
+              break
+      else:
+        # optimal_choice = self.random_optimal_choice(grid, math.inf)
+        should_prune = False
 
-          alpha = max(alpha, optimal_choice.value)
-          if alpha >= beta:
-            should_prune = True
+        for i in range(grid.height):
+          if should_prune:
             break
-        
-      return optimal_choice
+          for j in range(grid.width):
+            if not grid.adjacent_cell(i, j, self.player_one.token):
+              continue
 
+            grid_copy = copy.deepcopy(grid)
+            grid_copy.insert_coords(i, j, self.player_one.token)
+
+            new_optimal_choice = self.minimax(grid_copy, depth - 1, alpha, beta, True, is_move)
+            if new_optimal_choice.value < optimal_choice.value:
+              optimal_choice.x = i
+              optimal_choice.y = j
+              optimal_choice.value = new_optimal_choice.value
+
+            beta = min(beta, optimal_choice.value)
+            if alpha >= beta:
+              should_prune = True
+              break
     else:
-      optimal_choice = self.random_optimal_choice(grid, math.inf)
-      should_prune = False
+      if is_max_player:
+        optimal_choice = self.random_optimal_choice(grid, -math.inf)
 
-      for i in range(grid.height):
-        if should_prune:
-          break
-        for j in range(grid.width):
-          if grid.is_occupied(i, j):
-            continue
-
-          grid_copy = copy.deepcopy(grid)
-          grid_copy.insert_coords(i, j, self.player_one.token)
-
-          new_optimal_choice = self.minimax(grid_copy, depth - 1, alpha, beta, True, i, j)
-          if new_optimal_choice.value < optimal_choice.value:
-            optimal_choice.x = i
-            optimal_choice.y = j
-            optimal_choice.value = new_optimal_choice.value
-
-          beta = min(beta, optimal_choice.value)
-          if alpha >= beta:
-            should_prune = True
+        should_prune = False
+        self.is_first_placement = False
+        for i in range(grid.height):
+          if should_prune:
             break
+          for j in range(grid.width):
+            if grid.is_occupied(i, j):
+              continue
+            
+            grid_copy = copy.deepcopy(grid)
 
-      return optimal_choice
+            if i == 0 and j == 0:
+              self.is_first_placement = True
+            else:
+              self.is_first_placement = False
+
+            if self.is_first_placement:
+              grid_copy.insert_coords(optimal_choice.x, optimal_choice.y, self.player_two.token)            
+            else: 
+              grid_copy.insert_coords(i, j, self.player_two.token)
+
+            new_optimal_choice = None
+            if self.is_first_placement:
+              new_optimal_choice = self.minimax(grid_copy, depth - 1, alpha, beta, False, is_move)
+            else:
+              new_optimal_choice = self.minimax(grid_copy, depth - 1, alpha, beta, False, is_move)
+
+
+            if new_optimal_choice.value > optimal_choice.value:
+              if not self.is_first_placement:
+                optimal_choice.x = i
+                optimal_choice.y = j
+
+              optimal_choice.value = new_optimal_choice.value
+
+            alpha = max(alpha, optimal_choice.value)
+            if alpha >= beta:
+              should_prune = True
+              break
+          
+        # return optimal_choice
+
+      else:
+        optimal_choice = self.random_optimal_choice(grid, math.inf)
+        should_prune = False
+
+        for i in range(grid.height):
+          if should_prune:
+            break
+          for j in range(grid.width):
+            if grid.is_occupied(i, j):
+              continue
+
+            grid_copy = copy.deepcopy(grid)
+            grid_copy.insert_coords(i, j, self.player_one.token)
+
+            new_optimal_choice = self.minimax(grid_copy, depth - 1, alpha, beta, True, is_move)
+            if new_optimal_choice.value < optimal_choice.value:
+              optimal_choice.x = i
+              optimal_choice.y = j
+              optimal_choice.value = new_optimal_choice.value
+
+            beta = min(beta, optimal_choice.value)
+            if alpha >= beta:
+              should_prune = True
+              break
+
+        # return optimal_choice
+    return optimal_choice
 
   def calculate_grid_score(self, grid, is_max_player):
     score = -1
@@ -213,6 +265,15 @@ class AIController:
 
       return OptimalChoice(row_index, col_index, value)
 
+class TokenToMove:
+    x = 0
+    y = 0
+    value = 0
+
+    def __init__(self, x, y, value):
+        self.x = x
+        self.y = y
+        self.value = value
 
 class OptimalChoice:
     x = 0

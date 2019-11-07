@@ -42,6 +42,8 @@ class LightweightGrid:
         self.grid_cells[to_row][to_col] = self.grid_cells[from_row][from_col]
         self.grid_cells[from_row][from_col] = " "
 
+    def 
+
     def is_valid_adjacent_cell(self, row_index, col_index, move_row_index, move_col_index):    
         # top-left
         if row_index - 1 == move_row_index and col_index - 1 == move_col_index:
