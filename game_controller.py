@@ -44,23 +44,44 @@ class GameController:
             print("Gamemodes:\n")
             print("\t1- Player vs Player")
             print("\t2- Player vs AI")
-            selected_gamemode = input(
-                "\nPlease select gamemode option [1 or 2]: ")
+            selected_gamemode = input("\nPlease select gamemode option [1 or 2]: ")
 
             if selected_gamemode == "1":
                 self.play_with_AI = False
                 is_input_valid = True
-                print("\nSelected Player vs Player\n")
+                print("\n\tSelected Player vs Player\n")
             elif selected_gamemode == "2":
                 self.play_with_AI = True
                 is_input_valid = True
                 self.is_first_ai_placement = True
-                self.ai_controller = AIController(
-                    self.player_one, self.player_two)
-
-                print("\nSelected Player vs AI\n")
+                self.ai_controller = AIController(self.player_one, self.player_two)
+                print("\n\tSelected Player vs AI\n")
             else:
-                print("\nThat is not a valid gamemode option!\n")
+                print("\n\tThat is not a valid gamemode option!\n")
+
+    def prompt_player_order(self):
+        is_input_valid = False
+        while not is_input_valid:
+            print("Players:\n")
+            print("\t1- Player")
+            print("\t2- AI")
+            
+            selected_player = input("\nWho should play first? [1 or 2]: ")
+
+            if selected_player == "1":
+                self.player_one.name = "Player"
+                self.player_two.name = "AI"
+                self.player_two.is_ai = True
+                is_input_valid = True
+                print("\n\tPlayer will play first!\n")
+            elif selected_player == "2":
+                self.player_two.name = "Player"
+                self.player_one.name = "AI"
+                self.player_one.is_ai = True
+                is_input_valid = True
+                print("\n\tAI will play first!\n")
+            else:
+                print("\n\tThat is not a valid player option!\n")
 
     def exit_program(self, message):
         print("_____________________________________________________")
@@ -82,8 +103,6 @@ class GameController:
         letter = input_coords[0]
         number = int(input_coords[1:])
 
-        print("(" + letter + ", " + str(number) + ")\n")
-
         row_index = self.grid.height - number
         col_index = ord(letter) - 65
 
@@ -92,6 +111,11 @@ class GameController:
         input_coords['row'] = row_index
 
         return input_coords
+    
+    def format_coordinate(self, x, y):
+        letter = chr(y + 65)
+        number = x
+        return "(" + letter + ", " + str(number) + ")"
 
     def check_for_win(self, player_name, player_token, opponent_token, row_index, col_index):
         has_player_won = self.grid.check_for_x(
@@ -123,20 +147,30 @@ class GameController:
     def play(self):
         self.welcome_message()
         self.prompt_gamemode()
+        if self.play_with_AI:
+            self.prompt_player_order()
+
+        print("\t" + self.player_one.name + " is " + self.player_one.token)
+        print("\t" + self.player_two.name + " is " + self.player_two.token + "\n")
 
         while True:
             current_player = self.player_one if self.is_player_one_turn else self.player_two
             current_opponent = self.player_two if self.is_player_one_turn else self.player_one
             
-            if current_player is self.player_two and self.play_with_AI:
-
+            if current_player.is_ai and self.play_with_AI:
                 optimal_choice = None
                 if self.is_first_ai_placement:
                     optimal_choice = self.ai_controller.random_optimal_choice(self.lightweight_grid, 0)
                     self.is_first_ai_placement = False
                 else:
                     # Use minimax and alpha-beta pruning to find best action
-                    optimal_choice = self.ai_controller.minimax(self.lightweight_grid, 1, -math.inf, math.inf, True, -1, -1)
+                    optimal_choice = None
+                    if current_player is self.player_one:
+                        optimal_choice = self.ai_controller.minimax(self.lightweight_grid, 2, -math.inf, math.inf, False, -1, -1)
+                    else:
+                        optimal_choice = self.ai_controller.minimax(self.lightweight_grid, 2, -math.inf, math.inf, True, -1, -1)
+
+                print("\t" + current_player.name + " placed a token at: " + self.format_coordinate(10 - optimal_choice.x , optimal_choice.y) + "\n")
                 
                 self.grid.insert_coords(optimal_choice.x, optimal_choice.y, current_player.token)
                 self.lightweight_grid.insert_coords(optimal_choice.x, optimal_choice.y, current_player.token)
@@ -160,13 +194,12 @@ class GameController:
                 while not is_input_valid:
                     self.grid.display()
 
-                    player_input = input(
-                        "\n" + current_player.name + ", please enter a letter [A-L] followed by a number [1-10] [or quit/q to quit]: ")
+                    player_input = input("\n" + current_player.name + ", please enter a letter [A-L] followed by a number [1-10] [or quit/q to quit]: ")
+                    print()
                     input_coords = self.parse_input_coord(player_input)
 
                     if input_coords is None:
-                        print(
-                            "Please enter a letter [A-L] followed by a number [1-10]\n")
+                        print("Please enter a letter [A-L] followed by a number [1-10]\n")
                         continue
 
                     row_index = input_coords.get("row")
@@ -195,13 +228,11 @@ class GameController:
                     while not is_input_valid:
                         self.grid.display()
 
-                        player_input = input(
-                            "\n" + current_player.name + ", where would you like to move this token? [or quit/q to quit]: ")
+                        player_input = input("\n" + current_player.name + ", where would you like to move this token? [or quit/q to quit]: ")
                         move_coords = self.parse_input_coord(player_input)
 
                         if move_coords is None:
-                            print(
-                                "Please enter a letter [A-L] followed by a number [1-10]\n")
+                            print("Please enter a letter [A-L] followed by a number [1-10]\n")
                             continue
 
                         move_row_index = move_coords.get("row")
@@ -212,12 +243,10 @@ class GameController:
                             row_index, col_index, move_row_index, move_col_index)
                         if not is_valid_adjacent_cell:
                             print("This is not a valid adjacent cell")
-                            print(
-                                "Please enter a cell that is up/down/left/right/diagonal to original cell\n")
+                            print("Please enter a cell that is up/down/left/right/diagonal to original cell\n")
                             continue
 
-                        has_selected_occupied_cell = self.grid.is_occupied(
-                            move_row_index, move_col_index)
+                        has_selected_occupied_cell = self.grid.is_occupied(move_row_index, move_col_index)
                         if has_selected_occupied_cell:
                             print("This cell is occupied\n")
                             continue
@@ -227,24 +256,24 @@ class GameController:
                 if is_move_action:
                     self.grid.move_token(row_index, col_index, move_row_index, move_col_index)
                     self.lightweight_grid.move_token(row_index, col_index, move_row_index, move_col_index)
-                    
+
+                    print("\n\t" + current_player.name + " moved a token from " + self.format_coordinate(10 - row_index, col_index) + " to " + self.format_coordinate(10 - move_row_index, move_col_index))
+
                     # Checks if current player has won by moving a token to a new cell
-                    self.win_status_check(current_player.name, current_player.token,
-                                          current_opponent.token, move_row_index, move_col_index)
+                    self.win_status_check(current_player.name, current_player.token, current_opponent.token, move_row_index, move_col_index)
 
                     # Checks if opponent won by current player's move action
                     # col_index - 1 to check on the left side and col_inx + 1 to chec on the right side
-                    self.win_status_check(
-                        current_opponent.name, current_opponent.token, current_player.token, row_index, col_index - 1)
-                    self.win_status_check(
-                        current_opponent.name, current_opponent.token, current_player.token, row_index, col_index + 1)
+                    self.win_status_check(current_opponent.name, current_opponent.token, current_player.token, row_index, col_index - 1)
+                    self.win_status_check(current_opponent.name, current_opponent.token, current_player.token, row_index, col_index + 1)
                     self.number_of_moves -= 1
                 else:
                     self.grid.insert_coords(row_index, col_index, current_player.token)
                     self.lightweight_grid.insert_coords(row_index, col_index, current_player.token)
 
-                    self.win_status_check(
-                        current_player.name, current_player.token, current_opponent.token, row_index, col_index)
+                    print("\t" + current_player.name + " placed a token at: " + self.format_coordinate(10 - row_index, col_index))
+
+                    self.win_status_check(current_player.name, current_player.token, current_opponent.token, row_index, col_index)
                     self.number_of_tokens -= 1
                     current_player.number_of_tokens -= 1
             
