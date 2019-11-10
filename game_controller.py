@@ -85,7 +85,7 @@ class GameController:
 
     def exit_program(self, message):
         print("_____________________________________________________")
-        print(message)
+        print("\t" + message)
         print("_____________________________________________________\n")
         self.grid.display()
         sys.exit()
@@ -166,9 +166,9 @@ class GameController:
                     # Use minimax and alpha-beta pruning to find best action
                     optimal_choice = None
                     if current_player is self.player_one:
-                        optimal_choice = self.ai_controller.minimax(self.lightweight_grid, 2, -math.inf, math.inf, False, -1, -1)
+                        optimal_choice = self.ai_controller.minimax(self.lightweight_grid, 2, -math.inf, math.inf, False)
                     else:
-                        optimal_choice = self.ai_controller.minimax(self.lightweight_grid, 2, -math.inf, math.inf, True, -1, -1)
+                        optimal_choice = self.ai_controller.minimax(self.lightweight_grid, 2, -math.inf, math.inf, True)
 
                 print("\t" + current_player.name + " placed a token at: " + self.format_coordinate(10 - optimal_choice.x , optimal_choice.y) + "\n")
                 

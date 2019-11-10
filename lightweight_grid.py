@@ -103,37 +103,6 @@ class LightweightGrid:
 
         return all(state == player_token for state in cell_states)
 
-    def num_tokens_in_x(self, player_token, opponent_token, row_index, col_index):
-        if not self.is_section_within_grid(row_index, col_index):
-            return 0
-
-        # # If cell is empty, then don't bother continuing to check for X
-        # center_cell = self.grid_cells[row_index][col_index]
-        # if center_cell == " ":
-        #     return False
-
-        # # Check if crossed out
-        # right_cell_state = self.grid_cells[row_index][col_index - 1]
-        # left_cell_state = self.grid_cells[row_index][col_index + 1]
-        # if right_cell_state is opponent_token and left_cell_state is opponent_token:
-        #     return False
-
-        # Check if win condition
-        top_left_cell_state = self.grid_cells[row_index - 1][col_index - 1]
-        top_right_cell_state = self.grid_cells[row_index - 1][col_index + 1]
-        center_cell_state = self.grid_cells[row_index][col_index]
-        bottom_left_cell_state = self.grid_cells[row_index + 1][col_index - 1]
-        bottom_right_cell_state = self.grid_cells[row_index + 1][col_index + 1]
-
-        cell_states = [center_cell_state, top_left_cell_state, top_right_cell_state, bottom_left_cell_state, bottom_right_cell_state]
-        
-        num_cells_filled_correctly = 0
-        for state in cell_states:
-            if state == player_token:
-                num_cells_filled_correctly += 1
-
-        return num_cells_filled_correctly
-
     def is_section_within_grid(self, row_index, col_index):
         # Check edge cases
         if row_index - 1 < 0 or row_index + 1 >= self.height:
@@ -230,7 +199,7 @@ class LightweightGrid:
     #     # Right case
     #     if col_index + 2 < self.width: 
     #         right_crossing_cell = self.grid_cells[row_index][col_index + 2]
-    #         opponent_tokens_in_x = self.num_tokens_in_x(opponent_token, player_token, row_index, col_index + 1)
+    #         opponent_tokens_in_x = self.get_num_tokens_in_pattern(opponent_token, player_token, row_index, col_index + 1)
     #         if right_crossing_cell == player_token and opponent_tokens_in_x == 5:
     #             return math.inf
     #         elif opponent_tokens_in_x >= 3:
@@ -239,7 +208,7 @@ class LightweightGrid:
     #     # Left case
     #     if col_index - 2 >= 0:
     #         left_crossing_cell = self.grid_cells[row_index][col_index - 2]
-    #         opponent_tokens_in_x = self.num_tokens_in_x(opponent_token, player_token, row_index, col_index - 1)
+    #         opponent_tokens_in_x = self.get_num_tokens_in_pattern(opponent_token, player_token, row_index, col_index - 1)
     #         if left_crossing_cell == player_token and opponent_tokens_in_x == 5:
     #             return math.inf
     #         elif opponent_tokens_in_x >= 3:
@@ -326,7 +295,7 @@ class LightweightGrid:
             
             if num_player_tokens == 5:
                 if not num_opponent_edge_tokens == 2:
-                    return 1000000
+                    return math.inf
                 elif num_opponent_edge_tokens == 2:
                     return -math.inf
             else:
@@ -385,26 +354,21 @@ class LightweightGrid:
         if col_index + 1 < self.width and row_index != 0 and row_index != self.height - 1:
             if self.is_section_within_grid(row_index, col_index + 1):
                 num_opponent_tokens = self.get_num_tokens_in_pattern(opponent_token, row_index, col_index + 1)
-                # if num_opponent_tokens >= 1:
-                #     total_cell_score = math.inf
                 if num_opponent_tokens == 5:
                     # Always return infinity if opponent has 5 tokens
-                    return math.inf
-                elif num_opponent_tokens >= 2:
-                    total_cell_score += 5 * num_opponent_tokens
+                    total_cell_score += math.inf
+                elif num_opponent_tokens >= 4:
+                    total_cell_score += 35 * num_opponent_tokens
 
         # Check left case
         if col_index - 1 >= 0 and row_index != 0 and row_index != self.height - 1:
             if self.is_section_within_grid(row_index, col_index - 1):
                 num_opponent_tokens = self.get_num_tokens_in_pattern(opponent_token, row_index, col_index - 1)
-                # if num_opponent_tokens >= 1:
-                #     total_cell_score = math.inf
                 if num_opponent_tokens == 5:
                     # Always return infinity if opponent has 5 tokens
-                    return math.inf
-                elif num_opponent_tokens >= 2:
-                    total_cell_score += 5 * num_opponent_tokens
-
+                    total_cell_score += math.inf
+                elif num_opponent_tokens >= 4:
+                    total_cell_score += 35 * num_opponent_tokens
         
         # Check for block score
     

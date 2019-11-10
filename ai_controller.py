@@ -43,7 +43,7 @@ class AIController:
     self.game_end_status = "Game has not ended"
     return False
 
-  def minimax(self, grid, depth, alpha, beta, is_max_player, row_index, col_index):
+  def minimax(self, grid, depth, alpha, beta, is_max_player):
     has_game_ended = self.has_game_ended(grid)
     if depth == 0 or has_game_ended:
       return self.calculate_grid_score(grid, is_max_player)
@@ -74,11 +74,11 @@ class AIController:
 
           grid_copy = copy.deepcopy(grid)
           grid_copy.insert_coords(i, j, self.player_two.token)
-          new_optimal_choice = self.minimax(grid_copy, depth - 1, alpha, beta, False, i, j)
+          new_optimal_choice = self.minimax(grid_copy, depth - 1, alpha, beta, False)
 
           if new_optimal_choice.value > optimal_choice.value:
-            optimal_choice.x = new_optimal_choice.x
-            optimal_choice.y = new_optimal_choice.y
+            optimal_choice.x = i
+            optimal_choice.y = j
             optimal_choice.value = new_optimal_choice.value
 
           alpha = max(alpha, optimal_choice.value)
@@ -102,11 +102,11 @@ class AIController:
           grid_copy = copy.deepcopy(grid)
           grid_copy.insert_coords(i, j, self.player_one.token)
 
-          new_optimal_choice = self.minimax(grid_copy, depth - 1, alpha, beta, True, i, j)
+          new_optimal_choice = self.minimax(grid_copy, depth - 1, alpha, beta, True)
 
           if new_optimal_choice.value < optimal_choice.value:
-            optimal_choice.x = new_optimal_choice.x
-            optimal_choice.y = new_optimal_choice.y
+            optimal_choice.x = i
+            optimal_choice.y = j
             optimal_choice.value = new_optimal_choice.value
 
           beta = min(beta, optimal_choice.value)
@@ -117,32 +117,47 @@ class AIController:
       return optimal_choice
 
   def calculate_grid_score(self, grid, is_max_player):
+    player_one_score = 0
+    player_two_score = 0
+
     optimal_choice = OptimalChoice(-1, -1, -1)
 
     for i in range(grid.height):
       for j in range(grid.width):
-        result = grid.get_cell_score(self.player_two.token, self.player_one.token, i, j)
-        if result == math.inf or result == -math.inf:
-          optimal_choice.value = result 
-          return optimal_choice
+        if grid.get_cell_state(i, j) == self.player_one.token:
+          player_one_score += grid.get_cell_score(self.player_one.token, self.player_two.token, i, j)
+        elif grid.get_cell_state(i, j) == self.player_two.token:
+          player_two_score += grid.get_cell_score(self.player_two.token, self.player_one.token, i, j)
+
+    optimal_choice.value = player_two_score - player_one_score
+    
+    # if is_max_player:
+    #   optimal_choice.value = player_two_score - player_one_score
+    # else:
+    #   optimal_choice.value = player_one_score - player_two_score
+      
+        # result = grid.get_cell_score(self.player_two.token, self.player_one.token, i, j)
+        # if result == math.inf or result == -math.inf:
+        #   optimal_choice.value = result 
+        #   return optimal_choice
+        # # else:
+        #   # if is_max_player and result > score:
+        #   #   # score += result
+        #   #   optimal_choice.value += result 
+
+        #   # elif not is_max_player and result < score:
+        #   #   # score -= result
+        #   #   optimal_choice.value -= result 
+
         # else:
-          # if is_max_player and result > score:
-          #   # score += result
-          #   optimal_choice.value += result 
-
-          # elif not is_max_player and result < score:
-          #   # score -= result
-          #   optimal_choice.value -= result 
-
-        else:
-          if is_max_player and result > optimal_choice.value:
-            optimal_choice.x = i
-            optimal_choice.y = j
-            optimal_choice.value = result 
-          elif not is_max_player and result < optimal_choice.value:
-            optimal_choice.x = i
-            optimal_choice.y = j
-            optimal_choice.value = result 
+        #   if is_max_player and result > optimal_choice.value:
+        #     optimal_choice.x = i
+        #     optimal_choice.y = j
+        #     optimal_choice.value = result 
+        #   elif not is_max_player and result < optimal_choice.value:
+        #     optimal_choice.x = i
+        #     optimal_choice.y = j
+        #     optimal_choice.value = result 
     return optimal_choice
 
   # def test_calculate_grid_score(self, grid, is_max_player, row_index, col_index):
