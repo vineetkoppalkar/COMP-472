@@ -43,23 +43,19 @@ class AIController:
     self.game_end_status = "Game has not ended"
     return False
 
+  # Pseudo code for move
+  # if not num_current_player_tokens == 0:
+  # do minimax as usual
+  # else:
+  # do not check cell that does not have a player token adjacent to it
+  # remove that adjacent cell
+  
+  # def move_minimax(self, grid, depth, alpha, beta, is_max_player):
+
   def minimax(self, grid, depth, alpha, beta, is_max_player):
     has_game_ended = self.has_game_ended(grid)
     if depth == 0 or has_game_ended:
-      return self.calculate_grid_score(grid, is_max_player)
-      # return self.test_calculate_grid_score(grid, is_max_player, row_index, col_index)
-
-    #   if has_game_ended:
-    #     if self.game_end_status == "Player won":
-    #       return OptimalChoice(-1, -1, -math.inf)
-    #     elif self.game_end_status == "AI won":
-    #       return OptimalChoice(-1, -1, math.inf)
-    #     else:
-    #       # Ran out of tokens or no more moves
-    #       return OptimalChoice(-1, -1, 0)
-    #   else:
-    #     # Reached depth 0
-    #     return OptimalChoice(-1, -1, self.calculate_grid_score(grid))
+      return OptimalChoice(-1, -1, self.calculate_grid_score(grid, is_max_player))
 
     if is_max_player:
       optimal_choice = self.random_optimal_choice(grid, -math.inf)
@@ -116,11 +112,90 @@ class AIController:
 
       return optimal_choice
 
+  def minimax_move(self, grid, depth, alpha, beta, is_max_player):
+    has_game_ended = self.has_game_ended(grid)
+    if depth == 0 or has_game_ended:
+      return OptimalMoveChoice(-1, -1, -1, -1, self.calculate_grid_score(grid, is_max_player))
+
+    if is_max_player:
+      optimal_move_choice = OptimalMoveChoice(-1, -1, -1, -1, -math.inf)
+       
+      should_prune = False
+      for i in range(grid.height):
+        if should_prune:
+          break
+        for j in range(grid.width):
+          if should_prune:
+            break
+          
+          if not grid.get_cell_state(i, j) == self.player_two.token:
+            continue
+
+          adjacent_cells = grid.get_all_adjacent_cells(i, j)
+          for cell in adjacent_cells:
+            grid_copy = copy.deepcopy(grid)
+
+            # Move here
+            move_to_row_index = cell[0]
+            move_to_col_index = cell[1]
+
+            grid_copy.move_token(i, j, move_to_row_index, move_to_col_index)
+            new_optimal_move_choice = self.minimax(grid_copy, depth - 1, alpha, beta, False)
+
+            if new_optimal_move_choice.value > optimal_move_choice.value:
+              optimal_move_choice.from_x = i
+              optimal_move_choice.from_y = j
+              optimal_move_choice.to_x = move_to_row_index
+              optimal_move_choice.to_y = move_to_col_index
+              optimal_move_choice.value = new_optimal_move_choice.value
+
+            alpha = max(alpha, optimal_move_choice.value)
+            if alpha >= beta:
+              should_prune = True
+              break
+            
+      return optimal_move_choice
+    else:
+      optimal_move_choice = OptimalMoveChoice(-1, -1, -1, -1, math.inf)
+      should_prune = False
+      for i in range(grid.height):
+        if should_prune:
+          break
+        for j in range(grid.width):
+          if should_prune:
+            break
+          
+          if not grid.get_cell_state(i, j) == self.player_one.token:
+            continue
+
+          adjacent_cells = grid.get_all_adjacent_cells(i, j)
+          for cell in adjacent_cells:
+            grid_copy = copy.deepcopy(grid)
+
+            # Move here
+            move_to_row_index = cell[0]
+            move_to_col_index = cell[1]
+
+            grid_copy.move_token(i, j, move_to_row_index, move_to_col_index)
+            new_optimal_choice = self.minimax(grid_copy, depth - 1, alpha, beta, True)
+
+            if new_optimal_move_choice.value < optimal_move_choice.value:
+              optimal_move_choice.from_x = i
+              optimal_move_choice.from_y = j
+              optimal_move_choice.to_x = move_to_row_index
+              optimal_move_choice.to_y = move_to_col_index
+              optimal_move_choice.value = new_optimal_move_choice.value
+
+            alpha = min(alpha, optimal_move_choice.value)
+            if alpha >= beta:
+              should_prune = True
+              break
+            
+      return optimal_move_choice
+       
   def calculate_grid_score(self, grid, is_max_player):
     player_one_score = 0
     player_two_score = 0
-
-    optimal_choice = OptimalChoice(-1, -1, -1)
 
     for i in range(grid.height):
       for j in range(grid.width):
@@ -129,80 +204,7 @@ class AIController:
         elif grid.get_cell_state(i, j) == self.player_two.token:
           player_two_score += grid.get_cell_score(self.player_two.token, self.player_one.token, i, j)
 
-    optimal_choice.value = player_two_score - player_one_score
-    
-    # if is_max_player:
-    #   optimal_choice.value = player_two_score - player_one_score
-    # else:
-    #   optimal_choice.value = player_one_score - player_two_score
-      
-        # result = grid.get_cell_score(self.player_two.token, self.player_one.token, i, j)
-        # if result == math.inf or result == -math.inf:
-        #   optimal_choice.value = result 
-        #   return optimal_choice
-        # # else:
-        #   # if is_max_player and result > score:
-        #   #   # score += result
-        #   #   optimal_choice.value += result 
-
-        #   # elif not is_max_player and result < score:
-        #   #   # score -= result
-        #   #   optimal_choice.value -= result 
-
-        # else:
-        #   if is_max_player and result > optimal_choice.value:
-        #     optimal_choice.x = i
-        #     optimal_choice.y = j
-        #     optimal_choice.value = result 
-        #   elif not is_max_player and result < optimal_choice.value:
-        #     optimal_choice.x = i
-        #     optimal_choice.y = j
-        #     optimal_choice.value = result 
-    return optimal_choice
-
-  # def test_calculate_grid_score(self, grid, is_max_player, row_index, col_index):
-  #   optimal_choice = OptimalChoice(row_index, col_index, 0)
-
-  #   result = grid.get_cell_score(self.player_two.token, self.player_one.token, row_index, col_index)
-  #   if result == math.inf or result == -math.inf:
-  #     optimal_choice.value = result 
-  #     return optimal_choice
-  #   else:
-  #     if is_max_player and result > optimal_choice.value:
-  #       optimal_choice.value = result 
-  #     elif not is_max_player and result < optimal_choice.value:
-  #       optimal_choice.value = result
-
-  #   return optimal_choice
-
-  # def test_calculate_grid_score(self, grid):
-  #   value_grid = Grid(grid.width, grid.height)
-  #   highest_score = 0
-  #   for i in range(grid.height):
-  #     for j in range(grid.width):
-  #       new_score = grid.get_score(self.player_two.token, self.player_one.token, i, j)
-  #       if new_score == math.inf:
-  #         highest_score = new_score
-  #         return new_score
-  #       elif new_score == -math.inf:
-  #         highest_score = new_score
-  #         return new_score
-  #       elif highest_score < new_score:
-  #         highest_score = highest_score 
-  #       value_grid.insert_coords(i, j, str(highest_score))
-  #   value_grid.display()
-  #   return highest_score
-
-  # def test_calculate_grid_score(self, grid):
-  #     value_grid = Grid(grid.width, grid.height)
-  #     score = 0
-  #     for i in range(grid.height):
-  #         for j in range(grid.width):
-  #             cell_score = grid.get_score(self.player_two.token, self.player_one.token, i, j)
-  #             score += cell_score
-  #             value_grid.insert_coords(i, j, str(cell_score))
-  #     value_grid.display()
-  #     return score
+    return player_two_score - player_one_score
 
   def random_optimal_choice(self, grid, value):
       row_index = -1
@@ -228,3 +230,17 @@ class OptimalChoice:
         self.x = x
         self.y = y
         self.value = value
+
+class OptimalMoveChoice:
+  from_x = 0
+  from_y = 0
+  to_x = 0
+  to_y = 0
+  value = 0
+
+  def __init__(self, from_x, from_y, to_x, to_y, value):
+      self.from_x = from_x
+      self.from_y = from_y
+      self.to_x = to_x
+      self.to_y = to_y
+      self.value = value

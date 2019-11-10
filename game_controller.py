@@ -158,26 +158,41 @@ class GameController:
             current_opponent = self.player_two if self.is_player_one_turn else self.player_one
             
             if current_player.is_ai and self.play_with_AI:
-                optimal_choice = None
-                if self.is_first_ai_placement:
-                    optimal_choice = self.ai_controller.random_optimal_choice(self.lightweight_grid, 0)
-                    self.is_first_ai_placement = False
-                else:
-                    # Use minimax and alpha-beta pruning to find best action
+                if not current_player.number_of_tokens == 0:
                     optimal_choice = None
-                    if current_player is self.player_one:
-                        optimal_choice = self.ai_controller.minimax(self.lightweight_grid, 2, -math.inf, math.inf, False)
+                    if self.is_first_ai_placement:
+                        optimal_choice = self.ai_controller.random_optimal_choice(self.lightweight_grid, 0)
+                        self.is_first_ai_placement = False
                     else:
-                        optimal_choice = self.ai_controller.minimax(self.lightweight_grid, 2, -math.inf, math.inf, True)
+                        # Use minimax and alpha-beta pruning to find best action
+                        if current_player is self.player_one:
+                            optimal_choice = self.ai_controller.minimax(self.lightweight_grid, 2, -math.inf, math.inf, False)
+                        else:
+                            optimal_choice = self.ai_controller.minimax(self.lightweight_grid, 2, -math.inf, math.inf, True)
+        
+                    self.grid.insert_coords(optimal_choice.x, optimal_choice.y, current_player.token)
+                    self.lightweight_grid.insert_coords(optimal_choice.x, optimal_choice.y, current_player.token)
+                    
+                    print("\t" + current_player.name + " placed a token at: " + self.format_coordinate(10 - optimal_choice.x , optimal_choice.y) + "\n")
+                    
+                    self.win_status_check(current_player.name, current_player.token, current_opponent.token, optimal_choice.x, optimal_choice.y)
+                    self.number_of_tokens -= 1
+                    current_player.number_of_tokens -= 1
+                else:
+                    optimal_move_choice = self.ai_controller.minimax_move(self.lightweight_grid, 2, -math.inf, math.inf, True)
+                    
+                    self.grid.move_token(optimal_move_choice.from_x, optimal_move_choice.from_y, optimal_move_choice.to_x, optimal_move_choice.to_y)
+                    self.lightweight_grid.move_token(optimal_move_choice.from_x, optimal_move_choice.from_y, optimal_move_choice.to_x, optimal_move_choice.to_y)
+                    
+                    print("\t" + current_player.name + " moved a token from " + self.format_coordinate(10 - optimal_move_choice.from_x, optimal_move_choice.from_y) + " to " + self.format_coordinate(10 - optimal_move_choice.to_x, optimal_move_choice.to_y) + "\n")
+                    # Checks if current player has won by moving a token to a new cell
+                    self.win_status_check(current_player.name, current_player.token, current_opponent.token, optimal_move_choice.to_x, optimal_move_choice.to_y)
 
-                print("\t" + current_player.name + " placed a token at: " + self.format_coordinate(10 - optimal_choice.x , optimal_choice.y) + "\n")
-                
-                self.grid.insert_coords(optimal_choice.x, optimal_choice.y, current_player.token)
-                self.lightweight_grid.insert_coords(optimal_choice.x, optimal_choice.y, current_player.token)
-                
-                self.win_status_check(current_player.name, current_player.token, current_opponent.token, optimal_choice.x, optimal_choice.y)
-                self.number_of_tokens -= 1
-                current_player.number_of_tokens -= 1
+                    # Checks if opponent won by current player's move action
+                    # col_index - 1 to check on the left side and col_inx + 1 to chec on the right side
+                    self.win_status_check(current_opponent.name, current_opponent.token, current_player.token, optimal_move_choice.from_x, optimal_move_choice.from_y - 1)
+                    self.win_status_check(current_opponent.name, current_opponent.token, current_player.token, optimal_move_choice.from_x, optimal_move_choice.from_y + 1)
+                    self.number_of_moves -= 1
             else:
                 # Prompt player to place/move a token
                 input_coords = None
