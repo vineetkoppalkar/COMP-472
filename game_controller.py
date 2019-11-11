@@ -31,12 +31,7 @@ class GameController:
         self.number_of_moves = number_of_moves
 
     def welcome_message(self):
-        print('====================================== Welcome to X-Rudder ======================================')
-        print('Each player gets 15 tokens and is allowed 15 actions (placing a token or moving a token)')
-        print('To place a token, enter the coordinate of an empty cell')
-        print('To move a token, enter the coordinate of a cell containing an existing token followed\nby the coordinate to where the token should be moved')
-        print('Disclaimer: you can only move your own token')
-        print('=================================================================================================\n')
+        print("====================================== Welcome to X-Rudder ======================================")    
 
     def prompt_gamemode(self):
         is_input_valid = False
@@ -189,7 +184,6 @@ class GameController:
                     self.win_status_check(current_player.name, current_player.token, current_opponent.token, optimal_move_choice.to_x, optimal_move_choice.to_y)
 
                     # Checks if opponent won by current player's move action
-                    # col_index - 1 to check on the left side and col_inx + 1 to chec on the right side
                     self.win_status_check(current_opponent.name, current_opponent.token, current_player.token, optimal_move_choice.from_x, optimal_move_choice.from_y - 1)
                     self.win_status_check(current_opponent.name, current_opponent.token, current_player.token, optimal_move_choice.from_x, optimal_move_choice.from_y + 1)
                     self.number_of_moves -= 1
@@ -278,7 +272,6 @@ class GameController:
                     self.win_status_check(current_player.name, current_player.token, current_opponent.token, move_row_index, move_col_index)
 
                     # Checks if opponent won by current player's move action
-                    # col_index - 1 to check on the left side and col_inx + 1 to chec on the right side
                     self.win_status_check(current_opponent.name, current_opponent.token, current_player.token, row_index, col_index - 1)
                     self.win_status_check(current_opponent.name, current_opponent.token, current_player.token, row_index, col_index + 1)
                     self.number_of_moves -= 1

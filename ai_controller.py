@@ -34,23 +34,8 @@ class AIController:
       self.game_end_status = "AI won"
       return True
 
-    # # check if we ran out of tokens
-    # self.game_end_status = "Ran out of tokens"
-
-    # # check if we ran out of moves
-    # self.game_end_status = "No more moves"
-
     self.game_end_status = "Game has not ended"
     return False
-
-  # Pseudo code for move
-  # if not num_current_player_tokens == 0:
-  # do minimax as usual
-  # else:
-  # do not check cell that does not have a player token adjacent to it
-  # remove that adjacent cell
-  
-  # def move_minimax(self, grid, depth, alpha, beta, is_max_player):
 
   def minimax(self, grid, depth, alpha, beta, is_max_player):
     has_game_ended = self.has_game_ended(grid)
@@ -203,6 +188,10 @@ class AIController:
           player_one_score += grid.get_cell_score(self.player_one.token, self.player_two.token, i, j)
         elif grid.get_cell_state(i, j) == self.player_two.token:
           player_two_score += grid.get_cell_score(self.player_two.token, self.player_one.token, i, j)
+
+    if player_two_score == math.inf and player_one_score == math.inf:
+        print("both player scores are inf")
+        return math.inf 
 
     return player_two_score - player_one_score
 

@@ -42,43 +42,8 @@ class LightweightGrid:
         self.grid_cells[to_row][to_col] = self.grid_cells[from_row][from_col]
         self.grid_cells[from_row][from_col] = " "
 
-    # def is_valid_adjacent_cell(self, row_index, col_index, move_row_index, move_col_index):    
-    #     # top-left
-    #     if row_index - 1 == move_row_index and col_index - 1 == move_col_index:
-    #         return True
-
-    #     # top-middle
-    #     if row_index - 1 == move_row_index and col_index == move_col_index:
-    #         return True
-
-    #     # top-right
-    #     if row_index - 1 == move_row_index and col_index + 1 == move_col_index:
-    #         return True
-        
-    #     # left
-    #     if row_index == move_row_index and col_index - 1 == move_col_index:
-    #         return True
-
-    #     # right
-    #     if row_index == move_row_index and col_index + 1 == move_col_index:
-    #         return True
-
-    #     # bottom-left
-    #     if row_index + 1 == move_row_index and col_index - 1 == move_col_index:
-    #         return True
-
-    #     # bottom-middle
-    #     if row_index + 1 == move_row_index and col_index == move_col_index:
-    #         return True
-
-    #     # bottom-right
-    #     if row_index + 1 == move_row_index and col_index + 1 == move_col_index:
-    #         return True
-
-    #     return False
-
     def get_all_adjacent_cells(self, row_index, col_index):
-        adjacent_cells = [] #[[1, 2], [1, 3], [1, 4]]
+        adjacent_cells = []
 
         # Top left
         if self.is_section_within_grid(row_index - 1, col_index - 1):
@@ -197,6 +162,9 @@ class LightweightGrid:
                     section_score += -5
                 else: 
                     num_opponent_tokens = self.get_num_tokens_in_pattern(opponent_token, row_index, col_index)
+                    if num_player_tokens + num_opponent_tokens == 5:
+                        return 0
+                    
                     num_opponent_tokens += num_opponent_edge_tokens
                     section_score += math.factorial(num_player_tokens) - math.factorial(num_opponent_tokens) 
         else:
@@ -206,8 +174,9 @@ class LightweightGrid:
 
     def get_block_score(self, token, row_index, col_index):
         if self.is_section_within_grid(row_index, col_index):
-            num_tokens = self.get_num_edge_tokens_in_pattern(token,  row_index, col_index)
-            if num_tokens == 4:
+            num_tokens = self.get_num_tokens_in_pattern(token, row_index, col_index)
+            if num_tokens >= 4:
+                print("I block at " + str(row_index) + "- col: " + str(col_index))
                 return math.inf
             else:
                 return 0
@@ -235,27 +204,56 @@ class LightweightGrid:
 
         # Checking for crossed out
         # Check right case
-        if col_index + 1 < self.width and row_index != 0 and row_index != self.height - 1:
+        if col_index + 2 < self.width and row_index != 0 and row_index != self.height - 1:
             if self.is_section_within_grid(row_index, col_index + 1):
                 num_opponent_tokens = self.get_num_tokens_in_pattern(opponent_token, row_index, col_index + 1)
+                other_edge_cell_state = self.get_cell_state(row_index, col_index + 2)
                 if num_opponent_tokens == 5:
                     # Always return infinity if opponent has 5 tokens
                     total_cell_score += math.inf
-                elif num_opponent_tokens >= 4:
+                # elif other_edge_cell_state == opponent_token:
+                #     total_cell_score -= 35 * num_opponent_tokens
+                elif num_opponent_tokens >= 4 and not other_edge_cell_state == opponent_token:
+                    # print("inside >= 4 Right case, row: " + str(row_index) + "- col: " + str(col_index))
                     total_cell_score += 35 * num_opponent_tokens
 
         # Check left case
-        if col_index - 1 >= 0 and row_index != 0 and row_index != self.height - 1:
+        if col_index - 2 >= 0 and row_index != 0 and row_index != self.height - 1:
             if self.is_section_within_grid(row_index, col_index - 1):
                 num_opponent_tokens = self.get_num_tokens_in_pattern(opponent_token, row_index, col_index - 1)
+                other_edge_cell_state = self.get_cell_state(row_index, col_index - 2)
                 if num_opponent_tokens == 5:
                     # Always return infinity if opponent has 5 tokens
                     total_cell_score += math.inf
-                elif num_opponent_tokens >= 4:
+                # elif other_edge_cell_state == opponent_token:
+                #     total_cell_score -= 35 * num_opponent_tokens
+                elif num_opponent_tokens >= 4 and not other_edge_cell_state == opponent_token:
+                    # print("inside >= 4 Left case, row: " + str(row_index) + "- col: " + str(col_index))
                     total_cell_score += 35 * num_opponent_tokens
+                    
+                    
+        # # Check right case
+        # if col_index + 1 < self.width and row_index != 0 and row_index != self.height - 1:
+        #     if self.is_section_within_grid(row_index, col_index + 1):
+        #         num_opponent_tokens = self.get_num_tokens_in_pattern(opponent_token, row_index, col_index + 1)
+        #         if num_opponent_tokens == 5:
+        #             # Always return infinity if opponent has 5 tokens
+        #             total_cell_score += math.inf
+        #         elif num_opponent_tokens >= 4:
+        #             total_cell_score += 35 * num_opponent_tokens
+
+        # # Check left case
+        # if col_index - 1 >= 0 and row_index != 0 and row_index != self.height - 1:
+        #     if self.is_section_within_grid(row_index, col_index - 1):
+        #         num_opponent_tokens = self.get_num_tokens_in_pattern(opponent_token, row_index, col_index - 1)
+        #         if num_opponent_tokens == 5:
+        #             # Always return infinity if opponent has 5 tokens
+        #             total_cell_score += math.inf
+        #         elif num_opponent_tokens >= 4:
+        #             total_cell_score += 35 * num_opponent_tokens
         
+
         # Check for block score
-    
         # Center
         total_cell_score += self.get_block_score(opponent_token, row_index, col_index)
         
