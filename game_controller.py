@@ -56,7 +56,7 @@ class GameController:
 
                 is_input_valid = True
                 self.is_first_ai_placement = True
-                self.ai_controller = AIController(self.player_one, self.player_two)
+                self.ai_controller = AIController(self.player_one, self.player_two, self.number_of_moves)
                 print("\n\tSelected Player vs AI\n")
             else:
                 print("\n\tThat is not a valid gamemode option!\n")
@@ -141,10 +141,7 @@ class GameController:
                         self.is_first_ai_placement = False
                     else:
                         # Use minimax and alpha-beta pruning to find best action
-                        if current_player is self.player_one:
-                            optimal_choice = self.ai_controller.minimax(self.lightweight_grid, 2, -math.inf, math.inf, False)
-                        else:
-                            optimal_choice = self.ai_controller.minimax(self.lightweight_grid, 2, -math.inf, math.inf, True)
+                        optimal_choice = self.ai_controller.minimax(self.lightweight_grid, 2, -math.inf, math.inf, True)
         
                     self.grid.insert_coords(optimal_choice.x, optimal_choice.y, current_player.token)
                     self.lightweight_grid.insert_coords(optimal_choice.x, optimal_choice.y, current_player.token)
