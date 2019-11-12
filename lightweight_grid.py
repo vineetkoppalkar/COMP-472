@@ -172,14 +172,18 @@ class LightweightGrid:
 
         return section_score
 
-    def get_block_score(self, token, row_index, col_index):
+    def get_block_score(self, player_token, opponent_token, row_index, col_index):
         if self.is_section_within_grid(row_index, col_index):
-            num_tokens = self.get_num_tokens_in_pattern(token, row_index, col_index)
-            if num_tokens >= 4:
-                print("I block at " + str(row_index) + "- col: " + str(col_index))
-                return math.inf
-            else:
-                return 0
+            num_player_tokens = self.get_num_tokens_in_pattern(player_token, row_index, col_index)
+            num_opponent_tokens = self.get_num_tokens_in_pattern(opponent_token, row_index, col_index)
+
+            is_pattern_blocked = True if num_player_tokens + num_opponent_tokens == 5 else False            
+            if not is_pattern_blocked:
+                if num_opponent_tokens >= 4:
+                    print("I block at " + str(row_index) + "- col: " + str(col_index))
+                    return math.inf
+                else:
+                    return 0
         return 0
 
     def get_cell_score(self, player_token, opponent_token, row_index, col_index):
@@ -255,18 +259,18 @@ class LightweightGrid:
 
         # Check for block score
         # Center
-        total_cell_score += self.get_block_score(opponent_token, row_index, col_index)
+        total_cell_score += self.get_block_score(player_token, opponent_token, row_index, col_index)
         
         # Top left
-        total_cell_score += self.get_block_score(opponent_token, row_index - 1,  col_index - 1)
+        total_cell_score += self.get_block_score(player_token, opponent_token, row_index - 1,  col_index - 1)
         
         # Top right
-        total_cell_score += self.get_block_score(opponent_token, row_index - 1, col_index + 1)
+        total_cell_score += self.get_block_score(player_token, opponent_token, row_index - 1, col_index + 1)
         
         # Bottom left
-        total_cell_score += self.get_block_score(opponent_token, row_index + 1, col_index - 1)
+        total_cell_score += self.get_block_score(player_token, opponent_token, row_index + 1, col_index - 1)
         
         # Bottom right
-        total_cell_score += self.get_block_score(opponent_token, row_index + 1, col_index + 1)
+        total_cell_score += self.get_block_score(player_token, opponent_token, row_index + 1, col_index + 1)
 
         return total_cell_score
