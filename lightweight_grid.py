@@ -180,10 +180,7 @@ class LightweightGrid:
             is_pattern_blocked = True if num_player_tokens + num_opponent_tokens == 5 else False            
             if not is_pattern_blocked:
                 if num_opponent_tokens >= 4:
-                    print("I blocked at row: " + str(row_index) + " - col: " + str(col_index))
                     return math.inf
-                else:
-                    return 0
         return 0
 
     def get_cell_score(self, player_token, opponent_token, row_index, col_index):
@@ -213,10 +210,6 @@ class LightweightGrid:
                 num_player_tokens = self.get_num_tokens_in_pattern(player_token, row_index, col_index + 1)
                 num_opponent_tokens = self.get_num_tokens_in_pattern(opponent_token, row_index, col_index + 1)
                 
-                # is_pattern_blocked = False
-                # if num_player_tokens > 0 and num_opponent_tokens > 0:
-                #     is_pattern_blocked = True if num_player_tokens + num_opponent_tokens == 5 else False
-                
                 is_pattern_blocked = True if num_player_tokens + num_opponent_tokens == 5 else False
 
                 if not is_pattern_blocked:          
@@ -224,10 +217,7 @@ class LightweightGrid:
                     if num_opponent_tokens == 5:
                         # Always return infinity if opponent has 5 tokens
                         total_cell_score += math.inf
-                    # elif other_edge_cell_state == opponent_token:
-                    #     total_cell_score -= 35 * num_opponent_tokens
                     elif num_opponent_tokens >= 4 and not other_edge_cell_state == opponent_token:
-                        # print("inside >= 4 Right case, row: " + str(row_index) + "- col: " + str(col_index))
                         total_cell_score += 35 * num_opponent_tokens
 
         # Check left case
@@ -236,20 +226,13 @@ class LightweightGrid:
                 num_player_tokens = self.get_num_tokens_in_pattern(player_token, row_index, col_index - 1)
                 num_opponent_tokens = self.get_num_tokens_in_pattern(opponent_token, row_index, col_index - 1)
                 
-                # is_pattern_blocked = False
-                # if num_player_tokens > 0 and num_opponent_tokens > 0:
-                #     is_pattern_blocked = True if num_player_tokens + num_opponent_tokens == 5 else False
-                
                 is_pattern_blocked = True if num_player_tokens + num_opponent_tokens == 5 else False
                 if not is_pattern_blocked:          
                     other_edge_cell_state = self.get_cell_state(row_index, col_index - 2)
                     if num_opponent_tokens == 5:
                         # Always return infinity if opponent has 5 tokens
                         total_cell_score += math.inf
-                    # elif other_edge_cell_state == opponent_token:
-                    #     total_cell_score -= 35 * num_opponent_tokens
                     elif num_opponent_tokens >= 4 and not other_edge_cell_state == opponent_token:
-                        # print("inside >= 4 Left case, row: " + str(row_index) + "- col: " + str(col_index))
                         total_cell_score += 35 * num_opponent_tokens
 
         # Check for block score
