@@ -43,24 +43,41 @@ class GameController:
 
             if selected_gamemode == "1":
                 self.play_with_AI = False
-                self.player_one.name = "Player 1"
-                self.player_two.name = "Player 2"
-
                 is_input_valid = True
                 print("\n\tSelected Player vs Player\n")
             elif selected_gamemode == "2":
                 self.play_with_AI = True
-                self.player_one.name = "Player"
-                self.player_two.name = "AI"
-                self.player_two.is_ai = True
-
                 is_input_valid = True
                 self.is_first_ai_placement = True
-                self.ai_controller = AIController(self.player_one, self.player_two, self.number_of_moves)
                 print("\n\tSelected Player vs AI\n")
             else:
                 print("\n\tThat is not a valid gamemode option!\n")
 
+    def prompt_player_order(self):
+        is_input_valid = False
+        while not is_input_valid:
+            print("Players:\n")
+            print("\t1- Player")
+            print("\t2- AI")
+            
+            selected_player = input("\nWho should play first? [1 or 2]: ")
+            if selected_player == "1":
+                self.player_one.name = "Player"
+                self.player_two.name = "AI"
+                self.player_two.is_ai = True
+                is_input_valid = True
+                print("\n\tPlayer will play first!\n")
+            elif selected_player == "2":
+                self.player_two.name = "Player"
+                self.player_one.name = "AI"
+                self.player_one.is_ai = True
+                is_input_valid = True
+                print("\n\tAI will play first!\n")
+            else:
+                print("\n\tThat is not a valid player option!\n")
+                
+            self.ai_controller = AIController(self.player_one, self.player_two, self.number_of_moves)
+    
     def exit_program(self, message):
         print("_____________________________________________________")
         print("\t" + message)
@@ -125,6 +142,8 @@ class GameController:
     def play(self):
         self.welcome_message()
         self.prompt_gamemode()
+        if self.play_with_AI:
+            self.prompt_player_order()
 
         print("\t" + self.player_one.name + " is " + self.player_one.token)
         print("\t" + self.player_two.name + " is " + self.player_two.token + "\n")
