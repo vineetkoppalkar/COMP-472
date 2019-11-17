@@ -175,9 +175,12 @@ class GameController:
                     self.is_first_ai_placement = False
                 else:
                     # Use minimax and alpha-beta pruning to find best action
-                    optimal_choice = self.ai_controller.minimax(self.lightweight_grid, 3, -math.inf, math.inf, True)
-                
+                    optimal_choice = self.ai_controller.minimax(self.lightweight_grid, 2, -math.inf, math.inf, True)
+
                 if optimal_choice.to_x == -1 and optimal_choice.to_y == -1 and not current_player.number_of_tokens == 0:
+                    if optimal_choice.from_y == -1:
+                        optimal_choice = self.ai_controller.random_optimal_choice(self.lightweight_grid, 0)
+                    
                     # Do placement
                     self.grid.insert_coords(optimal_choice.from_x, optimal_choice.from_y, current_player.token)
                     self.lightweight_grid.insert_coords(optimal_choice.from_x, optimal_choice.from_y, current_player.token)
@@ -188,6 +191,8 @@ class GameController:
                     self.number_of_tokens -= 1
                     current_player.number_of_tokens -= 1
                 else:
+                    if optimal_choice.from_y == -1:
+                        optimal_choice = self.ai_controller.get_random_move(self.lightweight_grid, current_player.token, self.number_of_tokens//2 - current_player.number_of_tokens)
                     # Do move
                     self.grid.move_token(optimal_choice.from_x, optimal_choice.from_y, optimal_choice.to_x, optimal_choice.to_y)
                     self.lightweight_grid.move_token(optimal_choice.from_x, optimal_choice.from_y, optimal_choice.to_x, optimal_choice.to_y)
