@@ -61,6 +61,29 @@ class GameController:
             else:
                 print("\n\tThat is not a valid gamemode option!\n")
 
+    def prompt_token(self):
+        is_input_valid = False
+        while not is_input_valid:
+            print("Tokens:\n")
+            print("\t1- X")
+            print("\t2- O")
+            selected_gamemode = input("\nPlease select token option [1 or 2]: ")
+
+            if selected_gamemode == "1":
+                self.player_one.token = "X"
+                self.player_two.token = "O"
+
+                is_input_valid = True
+                print("\n\tSelected token X\n")
+            elif selected_gamemode == "2":
+                self.player_one.token = "O"
+                self.player_two.token = "X"
+
+                is_input_valid = True
+                print("\n\tSelected token O\n")
+            else:
+                print("\n\This is not a valid token option!\n")
+
     def exit_program(self, message):
         print("_____________________________________________________")
         print("\t" + message)
@@ -125,6 +148,7 @@ class GameController:
     def play(self):
         self.welcome_message()
         self.prompt_gamemode()
+        self.prompt_token()
 
         print("\t" + self.player_one.name + " is " + self.player_one.token)
         print("\t" + self.player_two.name + " is " + self.player_two.token + "\n")
