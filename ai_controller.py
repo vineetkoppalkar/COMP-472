@@ -11,7 +11,7 @@ class AIController:
   number_of_moves = None
 
   def __init__(self, player_one, player_two, number_of_moves):
-    if player_one.name == "AI":
+    if "AI" in player_one.name:
       self.ai_player = player_one
       self.human_player = player_two
     else:

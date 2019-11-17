@@ -53,28 +53,17 @@ class GameController:
             else:
                 print("\n\tThat is not a valid gamemode option!\n")
 
-    def prompt_token(self):
+    def prompt_token(self, player, opponent):
         is_input_valid = False
         while not is_input_valid:
-            print("Tokens:\n")
-            print("\t1- X")
-            print("\t2- O")
-            selected_gamemode = input("\nPlease select token option [1 or 2]: ")
+            selected_token = input("\n" + player.name + ", Please enter a character for your token: ")
+            
+            if selected_token == opponent.token:
+                print("\tPlease enter a different token!")
+                continue
 
-            if selected_gamemode == "1":
-                self.player_one.token = "X"
-                self.player_two.token = "O"
-
-                is_input_valid = True
-                print("\n\tSelected token X\n")
-            elif selected_gamemode == "2":
-                self.player_one.token = "O"
-                self.player_two.token = "X"
-
-                is_input_valid = True
-                print("\n\tSelected token O\n")
-            else:
-                print("\n\This is not a valid token option!\n")
+            player.token = selected_token
+            is_input_valid = True
 
     def prompt_player_order(self):
         is_input_valid = False
@@ -99,7 +88,7 @@ class GameController:
             else:
                 print("\n\tThat is not a valid player option!\n")
                 
-            self.ai_controller = AIController(self.player_one, self.player_two, self.number_of_moves)
+        self.ai_controller = AIController(self.player_one, self.player_two, self.number_of_moves)
     
     def exit_program(self, message):
         print("_____________________________________________________")
@@ -165,11 +154,14 @@ class GameController:
     def play(self):
         self.welcome_message()
         self.prompt_gamemode()
-        self.prompt_token()
+
+        self.prompt_token(self.player_one, self.player_two)
+        self.prompt_token(self.player_two, self.player_one)
+
         if self.play_with_AI:
             self.prompt_player_order()
 
-        print("\t" + self.player_one.name + " is " + self.player_one.token)
+        print("\n\t" + self.player_one.name + " is " + self.player_one.token)
         print("\t" + self.player_two.name + " is " + self.player_two.token + "\n")
 
         while True:
@@ -208,6 +200,7 @@ class GameController:
                     self.win_status_check(current_opponent.name, current_opponent.token, current_player.token, optimal_choice.from_x, optimal_choice.from_y - 1)
                     self.win_status_check(current_opponent.name, current_opponent.token, current_player.token, optimal_choice.from_x, optimal_choice.from_y + 1)
                     self.number_of_moves -= 1
+                
             else:
                 # Prompt player to place/move a token
                 input_coords = None
@@ -300,7 +293,7 @@ class GameController:
                     self.grid.insert_coords(row_index, col_index, current_player.token)
                     self.lightweight_grid.insert_coords(row_index, col_index, current_player.token)
 
-                    print("\t" + current_player.name + " placed a token at: " + self.format_coordinate(10 - row_index, col_index))
+                    print("\t" + current_player.name + " placed a token at: " + self.format_coordinate(10 - row_index, col_index) + "\n")
 
                     self.win_status_check(current_player.name, current_player.token, current_opponent.token, row_index, col_index)
                     self.number_of_tokens -= 1
