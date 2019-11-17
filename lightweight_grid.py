@@ -32,6 +32,9 @@ class LightweightGrid:
             for j in range(self.width):
                 self.grid_cells[i][j] = " "
 
+    def clear_cell(self, row_index, col_index):
+        self.grid_cells[row_index][col_index] = " "
+
     def is_occupied(self, row_index, col_index):
         return not self.grid_cells[row_index][col_index] == " "
 

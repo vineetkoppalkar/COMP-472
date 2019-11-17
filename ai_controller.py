@@ -66,15 +66,18 @@ class AIController:
             # Handle move
             adjacent_cells = grid.get_all_adjacent_cells(i, j)
             for cell in adjacent_cells:
-              grid_copy = copy.deepcopy(grid)
+              # grid_copy = copy.deepcopy(grid)
 
               # Move here
               move_to_row_index = cell[0]
               move_to_col_index = cell[1]
 
-              grid_copy.move_token(i, j, move_to_row_index, move_to_col_index)
-              new_optimal_choice = self.minimax(grid_copy, depth - 1, alpha, beta, False)
-
+              # grid_copy.move_token(i, j, move_to_row_index, move_to_col_index)
+              grid.move_token(i, j, move_to_row_index, move_to_col_index)
+              # new_optimal_choice = self.minimax(grid_copy, depth - 1, alpha, beta, False)
+              new_optimal_choice = self.minimax(grid, depth - 1, alpha, beta, False)
+              grid.move_token(move_to_row_index, move_to_col_index, i, j)
+              
               if new_optimal_choice.value > optimal_choice.value:
                 optimal_choice.from_x = i
                 optimal_choice.from_y = j
@@ -89,9 +92,13 @@ class AIController:
 
           elif self.ai_player.number_of_tokens > 0:
             # Handle place
-            grid_copy = copy.deepcopy(grid)
-            grid_copy.insert_coords(i, j, self.ai_player.token)
-            new_optimal_choice = self.minimax(grid_copy, depth - 1, alpha, beta, False)
+            # grid_copy = copy.deepcopy(grid)
+            
+            # grid_copy.insert_coords(i, j, self.ai_player.token)
+            grid.insert_coords(i, j, self.ai_player.token)
+            # new_optimal_choice = self.minimax(grid_copy, depth - 1, alpha, beta, False)
+            new_optimal_choice = self.minimax(grid, depth - 1, alpha, beta, False)
+            grid.clear_cell(i, j)
 
             if new_optimal_choice.value > optimal_choice.value:
               optimal_choice.from_x = i
@@ -127,14 +134,17 @@ class AIController:
             # Hanles moving a token
             adjacent_cells = grid.get_all_adjacent_cells(i, j)
             for cell in adjacent_cells:
-              grid_copy = copy.deepcopy(grid)
+              # grid_copy = copy.deepcopy(grid)
 
               # Move here
               move_to_row_index = cell[0]
               move_to_col_index = cell[1]
 
-              grid_copy.move_token(i, j, move_to_row_index, move_to_col_index)
-              new_optimal_choice = self.minimax(grid_copy, depth - 1, alpha, beta, True)
+              # grid_copy.move_token(i, j, move_to_row_index, move_to_col_index)
+              grid.move_token(i, j, move_to_row_index, move_to_col_index)
+              # new_optimal_choice = self.minimax(grid_copy, depth - 1, alpha, beta, True)
+              new_optimal_choice = self.minimax(grid, depth - 1, alpha, beta, True)
+              grid.move_token(move_to_row_index, move_to_col_index, i, j)
 
               if new_optimal_choice.value <  optimal_choice.value:
                 optimal_choice.from_x = i
@@ -149,10 +159,13 @@ class AIController:
                 break
           elif self.human_player.number_of_tokens > 0:
             # Handles placing a token
-            grid_copy = copy.deepcopy(grid)
-            grid_copy.insert_coords(i, j, self.human_player.token)
+            # grid_copy = copy.deepcopy(grid)
+            # grid_copy.insert_coords(i, j, self.human_player.token)
+            grid.insert_coords(i, j, self.human_player.token)
 
-            new_optimal_choice = self.minimax(grid_copy, depth - 1, alpha, beta, True)
+            # new_optimal_choice = self.minimax(grid_copy, depth - 1, alpha, beta, True)
+            new_optimal_choice = self.minimax(grid, depth - 1, alpha, beta, True)
+            grid.clear_cell(i, j)
 
             if new_optimal_choice.value < optimal_choice.value:
               optimal_choice.from_x = i
