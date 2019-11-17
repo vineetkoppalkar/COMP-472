@@ -5,14 +5,18 @@ import random
 
 
 class AIController:
-  player_one = None
-  player_two = None
+  human_player = None
+  ai_player = None
   game_end_status = None
   number_of_moves = None
 
   def __init__(self, player_one, player_two, number_of_moves):
-    self.player_one = player_one
-    self.player_two = player_two
+    if player_one.name == "AI":
+      self.ai_player = player_one
+      self.human_player = player_two
+    else:
+      self.ai_player = player_two
+      self.human_player = player_one
     self.number_of_moves = number_of_moves
 
   def has_won(self, grid, player_token, opponent_token):
@@ -25,13 +29,13 @@ class AIController:
           continue
 
   def has_game_ended(self, grid):
-    # check if player won
-    if self.has_won(grid, self.player_one.token, self.player_two.token):
+    # check if player has won
+    if self.has_won(grid, self.human_player.token, self.ai_player.token):
       self.game_end_status = "Player won"
       return True
 
-    # check if AI won
-    if self.has_won(grid, self.player_two.token, self.player_one.token):
+    # check if AI has won
+    if self.has_won(grid, self.ai_player.token, self.human_player.token):
       self.game_end_status = "AI won"
       return True
 
@@ -55,10 +59,10 @@ class AIController:
             break
           
           current_cell_state = grid.get_cell_state(i, j)
-          if current_cell_state == self.player_one.token:
+          if current_cell_state == self.human_player.token:
             continue
           
-          if current_cell_state == self.player_two.token:
+          if current_cell_state == self.ai_player.token:
             # Handle move
             adjacent_cells = grid.get_all_adjacent_cells(i, j)
             for cell in adjacent_cells:
@@ -83,10 +87,10 @@ class AIController:
                 should_prune = True
                 break
 
-          elif self.player_two.number_of_tokens > 0:
+          elif self.ai_player.number_of_tokens > 0:
             # Handle place
             grid_copy = copy.deepcopy(grid)
-            grid_copy.insert_coords(i, j, self.player_two.token)
+            grid_copy.insert_coords(i, j, self.ai_player.token)
             new_optimal_choice = self.minimax(grid_copy, depth - 1, alpha, beta, False)
 
             if new_optimal_choice.value > optimal_choice.value:
@@ -116,10 +120,10 @@ class AIController:
             break
           
           current_cell_state = grid.get_cell_state(i, j)
-          if current_cell_state == self.player_two.token:
+          if current_cell_state == self.ai_player.token:
             continue
           
-          if current_cell_state == self.player_one.token:
+          if current_cell_state == self.human_player.token:
             # Hanles moving a token
             adjacent_cells = grid.get_all_adjacent_cells(i, j)
             for cell in adjacent_cells:
@@ -143,10 +147,10 @@ class AIController:
               if alpha >= beta:
                 should_prune = True
                 break
-          elif self.player_one.number_of_tokens > 0:
+          elif self.human_player.number_of_tokens > 0:
             # Handles placing a token
             grid_copy = copy.deepcopy(grid)
-            grid_copy.insert_coords(i, j, self.player_one.token)
+            grid_copy.insert_coords(i, j, self.human_player.token)
 
             new_optimal_choice = self.minimax(grid_copy, depth - 1, alpha, beta, True)
 
@@ -165,21 +169,21 @@ class AIController:
       return optimal_choice
        
   def calculate_grid_score(self, grid, is_max_player):
-    player_one_score = 0
-    player_two_score = 0
+    human_player_score = 0
+    ai_player_score = 0
 
     for i in range(grid.height):
       for j in range(grid.width):
-        if grid.get_cell_state(i, j) == self.player_one.token:
-          player_one_score += grid.get_cell_score(self.player_one.token, self.player_two.token, i, j)
-        elif grid.get_cell_state(i, j) == self.player_two.token:
-          player_two_score += grid.get_cell_score(self.player_two.token, self.player_one.token, i, j)
+        if grid.get_cell_state(i, j) == self.human_player.token:
+          human_player_score += grid.get_cell_score(self.human_player.token, self.ai_player.token, i, j)
+        elif grid.get_cell_state(i, j) == self.ai_player.token:
+          ai_player_score += grid.get_cell_score(self.ai_player.token, self.human_player.token, i, j)
 
-    if player_two_score == math.inf and player_one_score == math.inf:
+    if ai_player_score == math.inf and human_player_score == math.inf:
         print("both player scores are inf")
         return math.inf 
 
-    return player_two_score - player_one_score
+    return ai_player_score - human_player_score
 
   def random_optimal_choice(self, grid, value):
       row_index = -1
