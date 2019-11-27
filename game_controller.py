@@ -56,7 +56,7 @@ class GameController:
     def prompt_token(self, player, opponent):
         is_input_valid = False
         while not is_input_valid:
-            selected_token = input("\n" + player.name + ", Please enter a character for your token: ")
+            selected_token = input(player.name + ", please enter a character for your token: ")
             
             if selected_token == opponent.token:
                 print("\tPlease enter a different token!")
@@ -78,13 +78,13 @@ class GameController:
                 self.player_two.name = "AI"
                 self.player_two.is_ai = True
                 is_input_valid = True
-                print("\n\tPlayer will play first!\n")
+                print("\n\tPlayer will play first!")
             elif selected_player == "2":
                 self.player_two.name = "Player"
                 self.player_one.name = "AI"
                 self.player_one.is_ai = True
                 is_input_valid = True
-                print("\n\tAI will play first!\n")
+                print("\n\tAI will play first!")
             else:
                 print("\n\tThat is not a valid player option!\n")
                 
@@ -97,27 +97,79 @@ class GameController:
         self.grid.display()
         sys.exit()
 
-    def parse_input_coord(self, input_coords):
+    def parse_input_coord(self, input_coords, player_token):
         input_coords = input_coords.upper()
         if input_coords == "QUIT" or input_coords == "Q":
             sys.exit()
 
-        is_valid_input = re.match('[A-L]((10)|[1-9])$', input_coords)
+        output = {}
+        coords_array = input_coords.split(" ")
+        output["is_move"] = True if len(coords_array) > 1 else False
+
+        is_valid_input = re.match('[A-L]((10)|[1-9])$', coords_array[0])
 
         if is_valid_input is None:
+            print("\tPlease enter a letter [A-L] followed by a number [1-10]\n")
             return None
 
-        letter = input_coords[0]
-        number = int(input_coords[1:])
+        letter = coords_array[0][0]
+        number = int(coords_array[0][1:])
 
         row_index = self.grid.height - number
         col_index = ord(letter) - 65
 
-        input_coords = {}
-        input_coords['col'] = col_index
-        input_coords['row'] = row_index
+        has_selected_occupied_cell = self.grid.is_occupied(row_index, col_index)
+        if not output["is_move"]:
+            # Prevent the player from placing a token on an occupied cell
+            if has_selected_occupied_cell:
+                print("\tCell (" + letter + ", " + str(number) + ") is occupied\n")
+                return None
+        else:
+            # Prevent the player from moving an empty cell
+            if not has_selected_occupied_cell:
+                print("\tCell (" + letter + ", " + str(number) + ") is empty")
+                print("\tPlease select an cell with your token\n")
+                return None
+            
+            # Prevent the player from moving the opponent's token
+            cell_state = self.grid.get_cell_state(row_index, col_index)
+            if cell_state is not player_token:
+                print("\tCell (" + letter + ", " + str(number) + ") does not contain your token")
+                print("\tPlease select an cell with your token\n")
+                return None
 
-        return input_coords
+        output['col'] = col_index
+        output['row'] = row_index
+
+        if output["is_move"]:
+            is_valid_input = re.match('[A-L]((10)|[1-9])$', coords_array[1])
+
+            if is_valid_input is None:
+                print("\tPlease enter a letter [A-L] followed by a number [1-10]\n")
+                return None
+
+            letter = coords_array[1][0]
+            number = int(coords_array[1][1:])
+
+            move_row_index = self.grid.height - number
+            move_col_index = ord(letter) - 65
+
+            # return true if move cell is adjacent to first inputted cell
+            is_valid_adjacent_cell = self.grid.is_valid_adjacent_cell(row_index, col_index, move_row_index, move_col_index)
+            if not is_valid_adjacent_cell:
+                print("\tCell (" + letter + ", " + str(number) + ") is not a valid adjacent cell")
+                print("\tPlease enter a cell that is up/down/left/right/diagonal to original cell\n")
+                return None
+
+            has_selected_occupied_cell = self.grid.is_occupied(move_row_index, move_col_index)
+            if has_selected_occupied_cell:
+                print("\tCell (" + letter + ", " + str(number) + ") is occupied\n")
+                return None
+
+            output['move_col'] = move_col_index
+            output['move_row'] = move_row_index
+
+        return output
     
     def format_coordinate(self, x, y):
         letter = chr(y + 65)
@@ -222,70 +274,35 @@ class GameController:
                 while not is_input_valid:
                     self.grid.display()
 
-                    player_input = input("\n" + current_player.name + ", please enter a letter [A-L] followed by a number [1-10] [or quit/q to quit]: ")
+                    player_input = input("\n" + current_player.name + "'s turn [quit/q to quit]: ")
                     print()
-                    input_coords = self.parse_input_coord(player_input)
+                    input_coords = self.parse_input_coord(player_input, current_player.token)
 
                     if input_coords is None:
-                        print("Please enter a letter [A-L] followed by a number [1-10]\n")
                         continue
-
-                    row_index = input_coords.get("row")
-                    col_index = input_coords.get("col")
-
-                    has_selected_occupied_cell = self.grid.is_occupied(
-                        row_index, col_index)
-                    if has_selected_occupied_cell:
-                        cell_state = self.grid.get_cell_state(
-                            row_index, col_index)
-                        if cell_state is current_player.token:
-                            is_move_action = True
-                        else:
-                            print("This cell is occupied\n")
-                            continue
+                    
+                    if not input_coords.get("is_move") and current_player.number_of_tokens == 0:
+                        is_move_action = False
+                        print("You have ran out of tokens to place. Please make a different move\n")
+                        continue
+                    elif input_coords.get("is_move"):
+                        is_move_action = True
+                        row_index = input_coords.get("row")
+                        col_index = input_coords.get("col")
+                        move_row_index = input_coords.get("move_row")
+                        move_col_index = input_coords.get("move_col")
                     else:
-                        if current_player.number_of_tokens == 0:
-                            print(
-                                "You have ran out of tokens to place. Please make a different move\n")
-                            continue
+                        is_move_action = False
+                        row_index = input_coords.get("row")
+                        col_index = input_coords.get("col")
 
                     is_input_valid = True
-
-                if is_move_action:
-                    is_input_valid = False
-                    while not is_input_valid:
-                        self.grid.display()
-
-                        player_input = input("\n" + current_player.name + ", where would you like to move this token? [or quit/q to quit]: ")
-                        move_coords = self.parse_input_coord(player_input)
-
-                        if move_coords is None:
-                            print("Please enter a letter [A-L] followed by a number [1-10]\n")
-                            continue
-
-                        move_row_index = move_coords.get("row")
-                        move_col_index = move_coords.get("col")
-
-                        # return true if move cell is adjacent to first inputted cell
-                        is_valid_adjacent_cell = self.grid.is_valid_adjacent_cell(
-                            row_index, col_index, move_row_index, move_col_index)
-                        if not is_valid_adjacent_cell:
-                            print("This is not a valid adjacent cell")
-                            print("Please enter a cell that is up/down/left/right/diagonal to original cell\n")
-                            continue
-
-                        has_selected_occupied_cell = self.grid.is_occupied(move_row_index, move_col_index)
-                        if has_selected_occupied_cell:
-                            print("This cell is occupied\n")
-                            continue
-
-                        is_input_valid = True
 
                 if is_move_action:
                     self.grid.move_token(row_index, col_index, move_row_index, move_col_index)
                     self.lightweight_grid.move_token(row_index, col_index, move_row_index, move_col_index)
 
-                    print("\n\t" + current_player.name + " moved a token from " + self.format_coordinate(10 - row_index, col_index) + " to " + self.format_coordinate(10 - move_row_index, move_col_index))
+                    print("\t" + current_player.name + " moved a token from " + self.format_coordinate(10 - row_index, col_index) + " to " + self.format_coordinate(10 - move_row_index, move_col_index) + "\n")
 
                     # Checks if current player has won by moving a token to a new cell
                     self.win_status_check(current_player.name, current_player.token, current_opponent.token, move_row_index, move_col_index)
